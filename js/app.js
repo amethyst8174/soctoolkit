@@ -22,7 +22,7 @@
   });
   $("year").textContent = String(new Date().getFullYear());
 
-  // ---------- Small DOM helper (no innerHTML anywhere) ----------
+  // ---------- Small DOM helper: builds elements with DOM methods only ----------
   function h(tag, attrs, kids) {
     var el = document.createElement(tag);
     if (attrs) for (var k in attrs) {
