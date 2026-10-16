@@ -138,3 +138,13 @@
   .crumb { font-size: 0; }
   .crumb strong { font-size: 14px; }
 }
+
+/* Confidential-data band on the home page */
+.safe { margin: 26px 0 0; padding: 20px; border-radius: 18px; border: 1px solid rgba(52, 211, 153, 0.35); background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(167, 139, 250, 0.08)); }
+.safe h2 { margin: 0 0 14px; display: flex; align-items: center; gap: 10px; font: 700 18px var(--display); color: var(--text); }
+.safe h2::before { content: ""; width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--ok), var(--violet)); -webkit-mask: radial-gradient(circle at 50% 42%, transparent 4px, #000 4.5px); mask: radial-gradient(circle at 50% 42%, transparent 4px, #000 4.5px); }
+.safe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.safe-grid div { display: grid; align-content: start; gap: 4px; padding: 12px 14px; border-radius: 12px; background: rgba(10, 6, 19, 0.55); border: 1px solid var(--line); }
+.safe-grid strong { color: var(--text); font: 600 14px var(--sans); }
+.safe-grid span { font-size: 13px; line-height: 1.5; color: var(--body); }
+.safe-v { margin: 12px 0 0; font-size: 12.5px; color: var(--muted); }

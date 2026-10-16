@@ -8,10 +8,10 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; frame-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
   <meta name="referrer" content="no-referrer">
   <title>SOC Toolkit · Cyber Insight Signals</title>
-  <meta name="description" content="Free, private utilities for SOC analysts: IOC extraction and hunt queries, email header analysis and phishing email triage. Everything runs in your browser.">
+  <meta name="description" content="Free SOC utilities that are safe for confidential data: IOC extraction and hunt queries, email header analysis, phishing triage and VPN IP checks. Everything runs in your browser; nothing is uploaded or stored.">
   <link rel="icon" type="image/png" href="assets/img/cis-logo.png">
-  <link rel="stylesheet" href="css/style.css?v=20261016e">
-  <link rel="stylesheet" href="css/shell.css?v=20261016e">
+  <link rel="stylesheet" href="css/style.css?v=20261016f">
+  <link rel="stylesheet" href="css/shell.css?v=20261016f">
 </head>
 <body class="shell-body is-home">
   <div class="glow" aria-hidden="true"></div>
@@ -61,11 +61,11 @@
             <div>
               <p class="eyebrow">By Cyber Insight Signals</p>
               <h1>SOC <span>Toolkit</span></h1>
-              <p class="lede">Free, private utilities for SOC analysts and incident responders. Triage phishing, read email headers and turn threat reports into hunt queries, all in your browser with nothing uploaded or stored.</p>
+              <p class="lede">Free SOC utilities that are safe to use with confidential company data. Triage phishing, read email headers, check IPs for VPNs and turn threat reports into hunt queries. Everything runs in your browser, and nothing is uploaded, looked up online or stored.</p>
               <ul class="trust" aria-label="Privacy guarantees">
-                <li><span class="tdot tdot-v" aria-hidden="true"></span>Runs entirely in your browser</li>
-                <li><span class="tdot tdot-m" aria-hidden="true"></span>No sign-up, no AI, no API keys</li>
-                <li><span class="tdot tdot-a" aria-hidden="true"></span>Nothing is stored</li>
+                <li><span class="tdot tdot-v" aria-hidden="true"></span>Safe for confidential data</li>
+                <li><span class="tdot tdot-m" aria-hidden="true"></span>Nothing leaves your browser</li>
+                <li><span class="tdot tdot-a" aria-hidden="true"></span>No AI, no APIs, nothing stored</li>
               </ul>
             </div>
             <div class="orbit" aria-hidden="true">
@@ -73,6 +73,17 @@
               <span class="blip b1"></span><span class="blip b2"></span><span class="blip b3"></span><span class="blip b4"></span>
               <img class="hero-img" src="assets/img/hero.png" alt="" width="200" height="200">
             </div>
+          </section>
+
+          <section class="safe" aria-labelledby="safe-title">
+            <h2 id="safe-title">Built for confidential data</h2>
+            <div class="safe-grid">
+              <div><strong>Nothing leaves your device</strong><span>Every tool runs as code in your browser tab. There is no server, so emails, headers, logs and IPs are never uploaded.</span></div>
+              <div><strong>Enforced by the browser</strong><span>A strict Content Security Policy blocks these pages from making any outbound request, so data cannot leave even by mistake.</span></div>
+              <div><strong>No AI, APIs or live lookups</strong><span>Reputation, geolocation and VPN checks use lists shipped with the site. No third party ever sees what you check.</span></div>
+              <div><strong>Nothing is kept</strong><span>No accounts, cookies or browser storage. Closing or reloading the page wipes everything.</span></div>
+            </div>
+            <p class="safe-v">Verify it yourself: open DevTools and the Network tab stays empty while you work. The full source is <a href="https://github.com/amethyst8174/soctoolkit" rel="noopener noreferrer" target="_blank">on GitHub</a>.</p>
           </section>
 
           <div class="divider" role="separator"><span>Utilities</span></div>
@@ -115,8 +126,8 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=20261016e"></script>
-  <script src="js/tools.js?v=20261016e"></script>
-  <script src="js/shell.js?v=20261016e"></script>
+  <script src="js/config.js?v=20261016f"></script>
+  <script src="js/tools.js?v=20261016f"></script>
+  <script src="js/shell.js?v=20261016f"></script>
 </body>
 </html>

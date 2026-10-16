@@ -26,5 +26,11 @@ window.SOC_TOOLS = [
     desc: "Drop in an .eml or .msg file to check its headers, links, QR codes and attachments together, with one verdict and IOCs ready to hunt.",
     icon: "assets/img/triage.png", url: "../header-lens/triage.html", color: "var(--amber)",
     share: "Phishing email triage that runs entirely in your browser"
+  },
+  {
+    id: "vpn-check", name: "VPN IP Checker", tag: "VPN, Tor and Private Relay",
+    desc: "Check whether IP addresses belong to a VPN, Tor or iCloud Private Relay using published lists, with a source and confidence level for every answer.",
+    icon: "assets/img/vpn.png", url: "vpn.html", color: "var(--ok)",
+    share: "VPN IP checker that runs entirely in your browser"
   }
 ];

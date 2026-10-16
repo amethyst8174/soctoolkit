@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: 22
       - run: node tools/test-engine.mjs
+      - run: node tools/test-vpn.mjs
 
   cross-browser:
     runs-on: ubuntu-latest

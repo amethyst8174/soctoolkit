@@ -1,11 +1,11 @@
 name: Refresh offline data
 
-# Rebuilds the lookup data the IOC extractor uses in the browser.
-# Threat lists refresh weekly; the larger IP-to-country/ASN data refreshes in the first week of each month
+# Rebuilds the offline lookup data the IOC extractor and VPN IP checker use in the browser.
+# Threat and VPN lists refresh twice a week (Monday and Thursday); the larger IP-to-country/ASN data refreshes in the first week of each month
 # to keep repository growth small. Runs on GitHub's servers and never sees any analyst data.
 on:
   schedule:
-    - cron: "23 3 * * 1"
+    - cron: "23 3 * * 1,4"
   workflow_dispatch:
     inputs:
       full:
@@ -38,9 +38,18 @@ jobs:
           done
           curl -fsSL --retry 3 -o "$SRC/firehol_level1.netset" https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
           curl -fsSL --retry 3 -o "$SRC/tor-exits.txt" https://check.torproject.org/torbulkexitlist || echo "Tor list unavailable, skipping"
+          # VPN IP checker sources. A failed download keeps that list's previous data and date.
+          x4b=https://raw.githubusercontent.com/X4BNet/lists_vpn/main/output
+          curl -fsSL --retry 3 -o "$SRC/x4b-vpn-ipv4.txt" "$x4b/vpn/ipv4.txt" || rm -f "$SRC/x4b-vpn-ipv4.txt"
+          curl -fsSL --retry 3 -o "$SRC/x4b-vpn-ipv6.txt" "$x4b/vpn/ipv6.txt" || rm -f "$SRC/x4b-vpn-ipv6.txt"
+          curl -fsSL --retry 3 -o "$SRC/x4b-dc-ipv4.txt" "$x4b/datacenter/ipv4.txt" || rm -f "$SRC/x4b-dc-ipv4.txt"
+          curl -fsSL --retry 3 -o "$SRC/x4b-dc-ipv6.txt" "$x4b/datacenter/ipv6.txt" || rm -f "$SRC/x4b-dc-ipv6.txt"
+          curl -fsSL --retry 3 -o "$SRC/icloud-egress.csv" https://mask-api.icloud.com/egress-ip-ranges.csv || rm -f "$SRC/icloud-egress.csv"
           wc -l "$SRC"/*
       - name: Build data
-        run: node tools/build-data.mjs "$RUNNER_TEMP/src"
+        run: |
+          node tools/build-data.mjs "$RUNNER_TEMP/src"
+          node tools/build-vpn.mjs "$RUNNER_TEMP/src"
       - name: Keep monthly files unless due
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
         run: |

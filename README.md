@@ -9,6 +9,7 @@ Free, private utilities for SOC analysts and incident responders, by Cyber Insig
 | IOC Extractor | `#ioc` (`ioc.html`) | Extracts IOCs from text and builds hunt queries (this repository) |
 | Header-Lens | `#header-lens` | Visual email header analysis ([header-lens](https://github.com/amethyst8174/header-lens)) |
 | Email Triage | `#email-triage` | Full .eml / .msg phishing triage ([header-lens](https://github.com/amethyst8174/header-lens)) |
+| VPN IP Checker | `#vpn-check` (`vpn.html`) | Checks IPs against published VPN, Tor and iCloud Private Relay lists (this repository) |
 
 The home page (`index.html`) lists the utilities and has a collapsible utilities panel on the left. A tool opens inside the same page in a frame from this site, with the panel collapsed. Each tool still works on its own page too.
 
@@ -24,6 +25,17 @@ The home page (`index.html`) lists the utilities and has a collapsible utilities
 - **Exports** CSV (formula-injection safe), JSON, a STIX 2.1 bundle with deterministic IDs, and defanged or plain lists.
 - **Gives deterministic results:** the same text always gives the same indicators, queries and exports. The page shows the input's SHA-256, the engine version and the data dates.
 
+## VPN IP Checker
+
+- **Checks** IPv4 and IPv6 addresses (pasted, or pulled out of any text, defanged forms included) against offline lists refreshed twice a week:
+  - Tor Project bulk exit list: **Tor exit node**, confidence High
+  - Apple iCloud Private Relay egress ranges: **iCloud Private Relay**, confidence High
+  - [X4BNet lists_vpn](https://github.com/X4BNet/lists_vpn) VPN list (MIT): **VPN network**, confidence Medium (built mainly from network ownership)
+  - X4BNet datacenter list: shown as a *Hosting or datacenter* network, VPN status **Unknown**
+- **Never guesses:** anything not on a list is **Unknown**, with the reason. Each list shows its source and last refresh date, and a list that failed to refresh keeps its previous data and date.
+- Adds country and network owner (ASN) from the same offline registry data as the IOC Extractor.
+- Exports CSV (formula-injection safe) with the status, confidence, matched lists and list dates.
+
 ## Privacy
 
 - A Content Security Policy (`connect-src 'none'`, `form-action 'none'`) stops the page from sending data anywhere.
@@ -36,11 +48,12 @@ The home page (`index.html`) lists the utilities and has a collapsible utilities
 ```
 npm ci --prefix tools
 node tools/test-engine.mjs                         # engine consistency test
+node tools/test-vpn.mjs                            # VPN checker rules test
 node tools/browser-consistency.mjs chromium        # same output in the browser
 node tools/build-sample.mjs                        # regenerate js/sample.js from test/report.txt
 ```
 
-The **Refresh offline data** workflow rebuilds `data/` on a schedule: threat lists and TLDs weekly, IP country/ASN data monthly.
+The **Refresh offline data** workflow rebuilds `data/` on a schedule: threat, Tor, VPN and Private Relay lists and TLDs twice a week (Monday and Thursday), IP country/ASN data monthly.
 
 To show the YouTube and blog links, set them in `js/config.js`.
 
@@ -49,6 +62,7 @@ To show the YouTube and blog links, set them in `js/config.js`.
 - IP to country and ASN: [sapics/ip-location-db](https://github.com/sapics/ip-location-db) (server-country and iptoasn), PDDL / public domain
 - [FireHOL level 1](https://github.com/firehol/blocklist-ipsets) blocklist
 - [Tor Project](https://check.torproject.org/torbulkexitlist) exit node list
+- VPN lists: [X4BNet lists_vpn](https://github.com/X4BNet/lists_vpn) (MIT), [Apple iCloud Private Relay egress ranges](https://mask-api.icloud.com/egress-ip-ranges.csv)
 - Country names: [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth, public domain) and i18n-iso-countries (MIT)
 - TLD list: [tlds](https://github.com/stephenmathieson/node-tlds) (MIT), from the IANA root zone
 

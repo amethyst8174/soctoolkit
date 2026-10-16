@@ -20,7 +20,7 @@ jobs:
             echo "::error::Third-party script, style or image found"; fail=1; fi
           if grep -rnE "innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\(" js; then
             echo "::error::HTML injection or eval found"; fail=1; fi
-          for page in index.html ioc.html; do
+          for page in index.html ioc.html vpn.html; do
             if ! grep -q "connect-src 'none'" "$page"; then
               echo "::error::Content Security Policy missing or relaxed in $page"; fail=1; fi
           done
