@@ -64,7 +64,7 @@
     });
   }
   function loadData() {
-    if (!dataPromise) dataPromise = Promise.all(["data/world.js", "data/threat.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016a"); }))
+    if (!dataPromise) dataPromise = Promise.all(["data/world.js", "data/threat.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016b"); }))
       .then(function () { return G.load(); }).catch(function () { return null; });
     return dataPromise;
   }
