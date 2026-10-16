@@ -30,8 +30,11 @@ The home page (`index.html`) lists the utilities and has a collapsible utilities
 - **Checks** IPv4 and IPv6 addresses (pasted, or pulled out of any text, defanged forms included) against offline lists refreshed twice a week:
   - Tor Project bulk exit list: **Tor exit node**, confidence High
   - Apple iCloud Private Relay egress ranges: **iCloud Private Relay**, confidence High
+  - Proton VPN server IPs via [tn3w/ProtonVPN-IPs](https://github.com/tn3w/ProtonVPN-IPs) (Apache-2.0): **Proton VPN server**, confidence High
+  - NordVPN's public server list (api.nordvpn.com): **NordVPN server**, confidence High
+  - The /24 block around each Proton server: **Proton VPN network**, confidence Medium
   - [X4BNet lists_vpn](https://github.com/X4BNet/lists_vpn) VPN list (MIT): **VPN network**, confidence Medium (built mainly from network ownership)
-  - X4BNet datacenter list: shown as a *Hosting or datacenter* network, VPN status **Unknown**
+  - X4BNet datacenter list: **Hosting network**, confidence Low (VPN possible, not confirmed)
 - **Never guesses:** anything not on a list is **Unknown**, with the reason. Each list shows its source and last refresh date, and a list that failed to refresh keeps its previous data and date.
 - Adds country and network owner (ASN) from the same offline registry data as the IOC Extractor.
 - Exports CSV (formula-injection safe) with the status, confidence, matched lists and list dates.
@@ -62,7 +65,7 @@ To show the YouTube and blog links, set them in `js/config.js`.
 - IP to country and ASN: [sapics/ip-location-db](https://github.com/sapics/ip-location-db) (server-country and iptoasn), PDDL / public domain
 - [FireHOL level 1](https://github.com/firehol/blocklist-ipsets) blocklist
 - [Tor Project](https://check.torproject.org/torbulkexitlist) exit node list
-- VPN lists: [X4BNet lists_vpn](https://github.com/X4BNet/lists_vpn) (MIT), [Apple iCloud Private Relay egress ranges](https://mask-api.icloud.com/egress-ip-ranges.csv)
+- VPN lists: [X4BNet lists_vpn](https://github.com/X4BNet/lists_vpn) (MIT), [tn3w/ProtonVPN-IPs](https://github.com/tn3w/ProtonVPN-IPs) (Apache-2.0), NordVPN public server list, [Apple iCloud Private Relay egress ranges](https://mask-api.icloud.com/egress-ip-ranges.csv)
 - Country names: [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth, public domain) and i18n-iso-countries (MIT)
 - TLD list: [tlds](https://github.com/stephenmathieson/node-tlds) (MIT), from the IANA root zone
 

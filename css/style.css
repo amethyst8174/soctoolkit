@@ -233,3 +233,4 @@ pre.code { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(-
 .vsources .vmissing { color: var(--warn); }
 .vh3 { margin-top: 18px; font-size: 14px; }
 @media (max-width: 760px) { .vrow { grid-template-columns: minmax(0, 1fr); } }
+.p-conf-low { color: #1a0b14; background: #fdba74; }

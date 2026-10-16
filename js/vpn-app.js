@@ -10,7 +10,7 @@
   var viewInput = $("view-input"), viewRes = $("view-res");
   var MAX_BYTES = 5 * 1024 * 1024, MAX_IPS = 10000, MAX_ROWS = 2000;
   var SAMPLE = "Sign-in alerts, last 24 hours\n" +
-    "185.220.101[.]45  Tor\n172.225.184.197  user: m.lee (iPhone)\n2.26.157.10  user: j.doe\n5.231.192.20  user: a.khan\n49.36.12.7  user: r.iyer\n" +
+    "185.220.101[.]45  Tor\n172.225.184.197  user: m.lee (iPhone)\n2.26.157.10  user: j.doe\n45.14.71.6  user: s.patel\n5.231.192.20  user: a.khan\n49.36.12.7  user: r.iyer\n" +
     "10.20.30.41  VPN gateway (internal)\n2a0d:5600:24:a1::7\n2001:550:1d05::10\n";
 
   // Brand links from config; hide any left empty.
@@ -49,7 +49,7 @@
     });
   }
   function loadData() {
-    if (!dataPromise) dataPromise = Promise.all(["data/vpn.js", "data/world.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016f"); }))
+    if (!dataPromise) dataPromise = Promise.all(["data/vpn.js", "data/world.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016g"); }))
       .then(function () { return Promise.all([V.load(), G.load()]); })
       .catch(function () { return [null, null]; });
     return dataPromise;
@@ -118,11 +118,15 @@
   var STATUS = {
     "Tor exit node": { k: "tor", c: "var(--bad)" },
     "iCloud Private Relay": { k: "relay", c: "var(--info)" },
-    "VPN network": { k: "vpn", c: "var(--magenta)" },
+    "Proton VPN server": { k: "vpn", c: "var(--magenta)" },
+    "NordVPN server": { k: "vpn", c: "var(--magenta)" },
+    "Proton VPN network": { k: "vpn", c: "var(--violet)" },
+    "VPN network": { k: "vpn", c: "var(--violet)" },
+    "Hosting network": { k: "hosting", c: "var(--amber)" },
     "Unknown": { k: "unknown", c: "var(--neutral)" },
     "Not a public IP": { k: "internal", c: "var(--t-path)" }
   };
-  var ORDER = ["Tor exit node", "iCloud Private Relay", "VPN network", "Unknown", "Not a public IP"];
+  var ORDER = ["Tor exit node", "iCloud Private Relay", "Proton VPN server", "NordVPN server", "Proton VPN network", "VPN network", "Hosting network", "Unknown", "Not a public IP"];
   var els = {};
 
   function render() {
@@ -131,7 +135,7 @@
     viewInput.classList.add("hidden"); viewRes.classList.remove("hidden");
 
     var counts = {}; S.rows.forEach(function (r) { counts[r.status] = (counts[r.status] || 0) + 1; });
-    var listed = (counts["Tor exit node"] || 0) + (counts["iCloud Private Relay"] || 0) + (counts["VPN network"] || 0);
+    var listed = S.rows.filter(function (r) { var k = (STATUS[r.status] || {}).k; return k === "tor" || k === "relay" || k === "vpn"; }).length;
 
     viewRes.appendChild(h("div", { class: "res-bar" }, [
       h("div", null, [h("p", { class: "eyebrow", text: "VPN IP checker" }), h("h2", { text: listed + " of " + S.rows.length + " addresses are on a VPN, Tor or Private Relay list" })]),
@@ -170,8 +174,9 @@
     var legend = h("section", { class: "card out-card", "aria-label": "Sources and confidence" }, [
       h("h2", { text: "What the confidence means" }),
       h("ul", { class: "vlegend" }, [
-        h("li", null, [h("span", { class: "pill p-conf-high", text: "High" }), " The operator publishes this address itself (Tor Project, Apple)."]),
-        h("li", null, [h("span", { class: "pill p-conf-medium", text: "Medium" }), " In a curated list of VPN networks. Built mainly from network ownership, so the exact address could be another service on that network."]),
+        h("li", null, [h("span", { class: "pill p-conf-high", text: "High" }), " The operator publishes this address itself: Tor Project, Apple, or the VPN provider's own server list (Proton, NordVPN)."]),
+        h("li", null, [h("span", { class: "pill p-conf-medium", text: "Medium" }), " Next to a listed VPN server (same /24 block) or in a curated list of VPN networks built mainly from network ownership, so the exact address could be another service."]),
+        h("li", null, [h("span", { class: "pill p-conf-low", text: "Low" }), " Hosting or datacenter network that no VPN list names. A VPN is possible but not confirmed."]),
         h("li", null, [h("span", { class: "pill p-unknown", text: "Unknown" }), " No list checked says this is a VPN, Tor or Private Relay. That is not proof it isn't one."])
       ]),
       h("h3", { class: "vh3", text: "Lists checked" }),
@@ -201,7 +206,7 @@
     if (counts["Not an IP address"]) els.tiles.appendChild(mk("Not an IP address", "Not an IP address", "var(--t-path)", counts["Not an IP address"]));
   }
 
-  var LIST_NAMES = { tor: "Tor exit list", icloud: "iCloud Private Relay", vpn: "VPN list", dc: "Datacenter list" };
+  var LIST_NAMES = { tor: "Tor exit list", icloud: "iCloud Private Relay", proton: "Proton server list", nord: "NordVPN server list", proton24: "Proton /24 blocks", vpn: "X4B VPN list", dc: "Datacenter list" };
   function renderRows() {
     els.rows.textContent = "";
     var v = S.rows.filter(function (r) {
@@ -215,7 +220,7 @@
       var pills = [];
       if (r.confidence) pills.push(h("span", { class: "pill p-conf-" + r.confidence.toLowerCase(), text: "Confidence: " + r.confidence }));
       else if (r.status === "Unknown") pills.push(h("span", { class: "pill p-unknown", text: "Confidence: unknown" }));
-      if (r.network) pills.push(h("span", { class: "pill p-geo", text: r.network }));
+      if (r.network && r.status !== "Hosting network") pills.push(h("span", { class: "pill p-geo", text: r.network }));
       if (r.geo) pills.push(h("span", { class: "pill p-geo", text: [r.geo.country, r.geo.asn ? "AS" + r.geo.asn + (r.geo.owner ? " " + r.geo.owner : "") : ""].filter(Boolean).join(" · ") }));
       (r.matches || []).forEach(function (m) { if (m !== "dc") pills.push(h("span", { class: "pill p-defanged", text: "Listed: " + (LIST_NAMES[m] || m) })); });
       if (r.mappedFrom) pills.push(h("span", { class: "pill p-geo", text: "Checked as IPv4 from " + r.mappedFrom }));

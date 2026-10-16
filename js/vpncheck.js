@@ -72,8 +72,16 @@
       why: "Listed by the Tor Project as a Tor exit node as of the list date shown under Lists checked." },
     { id: "icloud", status: "iCloud Private Relay", confidence: "High",
       why: "Listed by Apple as an iCloud Private Relay egress range as of the list date shown under Lists checked." },
+    { id: "proton", status: "Proton VPN server", confidence: "High",
+      why: "Listed in Proton VPN's own server list (collected daily by tn3w/ProtonVPN-IPs) as a Proton VPN server address." },
+    { id: "nord", status: "NordVPN server", confidence: "High",
+      why: "Listed in NordVPN's own public server list as a NordVPN server address." },
+    { id: "proton24", status: "Proton VPN network", confidence: "Medium",
+      why: "In the same /24 block as a listed Proton VPN server. Proton's traffic leaves from neighbouring addresses in these blocks, but a block can also hold other customers of the hosting provider." },
     { id: "vpn", status: "VPN network", confidence: "Medium",
-      why: "In X4B's curated list of known VPN networks. The list is built mainly from network ownership, so this exact address could be another service on the same network." }
+      why: "In X4B's curated list of known VPN networks. The list is built mainly from network ownership, so this exact address could be another service on the same network." },
+    { id: "dc", status: "Hosting network", confidence: "Low",
+      why: "Hosting or datacenter network (X4B datacenter list). VPNs and proxies often run on networks like this, but so do ordinary servers, and this address is not in any VPN list. VPN possible, not confirmed." }
   ];
 
   // lists: { id: { v4: packedString, v6: packedString } }, loaded: ids that are available.
@@ -100,9 +108,7 @@
     }
     res.status = "Unknown";
     res.confidence = "";
-    res.note = dc
-      ? "Hosting or datacenter network. VPNs, proxies and ordinary servers all run on networks like this, and this address is not in any VPN list."
-      : "Not in any list checked. This does not prove it is not a VPN: small, new or self-hosted VPNs and residential proxies are not listed.";
+    res.note = "Not in any list checked. This does not prove it is not a VPN: small, new or self-hosted VPNs and residential proxies are not listed.";
     return res;
   }
 
@@ -128,7 +134,8 @@
     return Promise.all(jobs).then(function () { cache = lists; return lists; }).catch(function () { return null; });
   }
   function sources() {
-    var D = root.SOC_VPN, all = ["tor", "icloud", "vpn", "dc"], names = { tor: "Tor exit node", icloud: "iCloud Private Relay", vpn: "Known VPN network", dc: "Hosting or datacenter network" };
+    var D = root.SOC_VPN, all = ["tor", "icloud", "proton", "nord", "proton24", "vpn", "dc"],
+      names = { tor: "Tor exit node", icloud: "iCloud Private Relay", proton: "Proton VPN servers", nord: "NordVPN servers", proton24: "Proton VPN /24 blocks", vpn: "Known VPN network", dc: "Hosting or datacenter network" };
     return all.map(function (id) {
       var l = D && D.lists[id];
       return l ? { id: id, name: l.name, source: l.source, url: l.url, updated: l.updated, ranges: l.n4 + l.n6, available: true }

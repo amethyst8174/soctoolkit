@@ -10,6 +10,10 @@
 //   x4b-vpn-ipv6.txt         X4BNet/lists_vpn output/vpn/ipv6.txt (MIT)
 //   x4b-dc-ipv4.txt          X4BNet/lists_vpn output/datacenter/ipv4.txt (MIT)
 //   x4b-dc-ipv6.txt          X4BNet/lists_vpn output/datacenter/ipv6.txt (MIT)
+//   proton-ips.txt           tn3w/ProtonVPN-IPs protonvpn_ips.txt (Apache-2.0), Proton's advertised server IPs
+//   proton-entry-ips.txt     tn3w/ProtonVPN-IPs protonvpn_entry_ips.txt (Apache-2.0)
+//   proton-ranges.txt        tn3w/ProtonVPN-IPs protonvpn_ip_ranges.txt, the /24 of each advertised IPv4
+//   nord-servers.txt         NordVPN public server list (api.nordvpn.com/v1/servers), station IPv4/IPv6, one per line
 
 import fs from "node:fs";
 import path from "node:path";
@@ -91,6 +95,12 @@ const DEFS = [
     files: ["tor-exits.txt"], lines: (t) => lineList(t) },
   { id: "icloud", name: "iCloud Private Relay", source: "Apple iCloud Private Relay egress ranges", url: "https://mask-api.icloud.com/egress-ip-ranges.csv",
     files: ["icloud-egress.csv"], lines: (t) => t.split(/\r?\n/).map((l) => l.split(",")[0].trim()).filter(Boolean) },
+  { id: "proton", name: "Proton VPN servers", source: "Proton VPN server list via tn3w/ProtonVPN-IPs (Apache-2.0)", url: "https://github.com/tn3w/ProtonVPN-IPs",
+    files: ["proton-ips.txt", "proton-entry-ips.txt"], lines: (t) => lineList(t) },
+  { id: "nord", name: "NordVPN servers", source: "NordVPN public server list (api.nordvpn.com)", url: "https://api.nordvpn.com/v1/servers",
+    files: ["nord-servers.txt"], lines: (t) => lineList(t) },
+  { id: "proton24", name: "Proton VPN /24 blocks", source: "tn3w/ProtonVPN-IPs, /24 around each Proton server (Apache-2.0)", url: "https://github.com/tn3w/ProtonVPN-IPs",
+    files: ["proton-ranges.txt"], lines: (t) => lineList(t) },
   { id: "vpn", name: "Known VPN network", source: "X4BNet lists_vpn, VPN list (MIT)", url: "https://github.com/X4BNet/lists_vpn",
     files: ["x4b-vpn-ipv4.txt", "x4b-vpn-ipv6.txt"], lines: (t) => lineList(t) },
   { id: "dc", name: "Hosting or datacenter network", source: "X4BNet lists_vpn, datacenter list (MIT)", url: "https://github.com/X4BNet/lists_vpn",

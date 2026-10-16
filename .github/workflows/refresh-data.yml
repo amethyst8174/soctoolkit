@@ -45,6 +45,14 @@ jobs:
           curl -fsSL --retry 3 -o "$SRC/x4b-dc-ipv4.txt" "$x4b/datacenter/ipv4.txt" || rm -f "$SRC/x4b-dc-ipv4.txt"
           curl -fsSL --retry 3 -o "$SRC/x4b-dc-ipv6.txt" "$x4b/datacenter/ipv6.txt" || rm -f "$SRC/x4b-dc-ipv6.txt"
           curl -fsSL --retry 3 -o "$SRC/icloud-egress.csv" https://mask-api.icloud.com/egress-ip-ranges.csv || rm -f "$SRC/icloud-egress.csv"
+          proton=https://raw.githubusercontent.com/tn3w/ProtonVPN-IPs/master
+          curl -fsSL --retry 3 -o "$SRC/proton-ips.txt" "$proton/protonvpn_ips.txt" || rm -f "$SRC/proton-ips.txt"
+          curl -fsSL --retry 3 -o "$SRC/proton-entry-ips.txt" "$proton/protonvpn_entry_ips.txt" || rm -f "$SRC/proton-entry-ips.txt"
+          curl -fsSL --retry 3 -o "$SRC/proton-ranges.txt" "$proton/protonvpn_ip_ranges.txt" || rm -f "$SRC/proton-ranges.txt"
+          # NordVPN's own public server list: keep only each server's IPv4/IPv6 station address.
+          if curl -fsSL --retry 3 -o "$RUNNER_TEMP/nord.json" "https://api.nordvpn.com/v1/servers?limit=20000"; then
+            jq -r '.[] | .station, .ipv6_station | select(. != null and . != "")' "$RUNNER_TEMP/nord.json" > "$SRC/nord-servers.txt" || rm -f "$SRC/nord-servers.txt"
+          fi
           wc -l "$SRC"/*
       - name: Build data
         run: |
