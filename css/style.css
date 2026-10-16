@@ -48,7 +48,8 @@ a:hover { text-decoration: underline; }
 .share-l { font: 500 11px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--body); margin-right: 2px; }
 .share-btn { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: #fff; font: 700 14px/1 var(--sans); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35); transition: transform 0.1s, filter 0.15s; }
 .share-btn:hover { text-decoration: none; color: #fff; filter: brightness(1.15); transform: translateY(-2px); }
-.share-li { background: #0a66c2; } .share-x { background: #000; box-shadow: 0 0 0 1px #4a3a66, 0 4px 12px rgba(0, 0, 0, 0.35); } .share-fb { background: #1877f2; }
+.share-li { background: #0a66c2; } .share-x { background: #000; } .share-fb { background: #1877f2; }
+.share-btn { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92), 0 4px 12px rgba(0, 0, 0, 0.35); }
 .share-li span { font-size: 13px; letter-spacing: -0.02em; } .share-fb span { font: 700 16px/1 Georgia, serif; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); padding: 6px 12px 6px 6px; border: 1px solid var(--line); border-radius: 999px; background: rgba(26, 16, 48, 0.75); }
 .brand:hover { text-decoration: none; border-color: var(--line-strong); }
@@ -211,3 +212,8 @@ pre.code { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(-
   .res-bar .btn-primary { height: 34px; font-size: 13px; padding: 0 14px; }
   .exp { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Inside the SOC Toolkit: the toolkit shows the top bar and footer once around the tool */
+.embedded .topbar, .embedded .footer { display: none; }
+.embedded #view-input { padding-top: 8px; }
+.embedded main.res { padding-top: 16px; }

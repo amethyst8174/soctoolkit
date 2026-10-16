@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Privacy enforcement: the browser blocks every outbound request and form submission from this page. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>IOC extractor · soc-toolkit</title>
+  <meta name="description" content="Extract IOCs from any threat report, alert or log and turn them into hunt queries for Sentinel, Splunk, Elastic and CrowdStrike. Runs entirely in your browser.">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="stylesheet" href="css/style.css?v=20261016d">
+  <script src="js/embed.js?v=20261016d"></script>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="SOC Toolkit home">
+      <img src="assets/img/favicon.png" alt="" width="28" height="28">
+      <span>soc<em>-toolkit</em></span>
+    </a>
+    <div class="topbar-r">
+      <nav class="share" aria-label="Share soc-toolkit">
+        <span class="share-l">Share</span>
+        <a class="share-btn share-li" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23ioc" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn" aria-label="Share on LinkedIn"><span aria-hidden="true">in</span></a>
+        <a class="share-btn share-x" href="https://x.com/intent/post?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23ioc&amp;text=IOC%20extractor%20with%20ready-made%20hunt%20queries%2C%20running%20entirely%20in%20your%20browser" target="_blank" rel="noopener noreferrer" title="Share on X (Twitter)" aria-label="Share on X (Twitter)"><span aria-hidden="true">X</span></a>
+        <a class="share-btn share-fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23ioc" target="_blank" rel="noopener noreferrer" title="Share on Facebook" aria-label="Share on Facebook"><span aria-hidden="true">f</span></a>
+      </nav>
+      <a class="brand" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+        <img src="assets/img/cis-logo.png" alt="Cyber Insight Signals logo" width="36" height="36">
+        <span class="brand-text">
+          <strong>Cyber Insight Signals</strong>
+          <small>Translating Cyber Chaos into Clarity</small>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main id="view-input">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">IOC extractor</p>
+        <h1>IOC <span>extractor</span></h1>
+        <p class="lede">Paste a threat report, alert or log and get every indicator pulled out, refanged and checked, with hunt queries for Sentinel, Splunk, Elastic and CrowdStrike ready to copy.</p>
+        <ul class="trust" aria-label="Privacy guarantees">
+          <li><span class="tdot tdot-v" aria-hidden="true"></span>Runs entirely in your browser</li>
+          <li><span class="tdot tdot-m" aria-hidden="true"></span>No AI, no APIs, no keys</li>
+          <li><span class="tdot tdot-a" aria-hidden="true"></span>Nothing is stored</li>
+        </ul>
+      </div>
+      <div class="hero-art">
+        <img src="assets/img/avatar.png" alt="A lens picking indicators out of a document" width="200" height="200">
+      </div>
+    </section>
+
+    <section class="card input-card" aria-labelledby="input-title">
+      <div class="card-head">
+        <h2 id="input-title">Paste text to extract from</h2>
+        <div class="tools">
+          <label class="btn btn-ghost" for="file-input">Open file</label>
+          <input id="file-input" type="file" accept=".txt,.log,.csv,.tsv,.json,.md,.html,.htm,.eml,.xml,.ioc,text/*,application/json,message/rfc822" hidden>
+          <button class="btn btn-ghost" id="sample-btn" type="button">Try a sample</button>
+          <button class="btn btn-ghost" id="clear-btn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="drop" id="drop-zone">
+        <textarea id="text-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-describedby="input-status"
+          placeholder="Paste a threat report, alert, ticket, email or log lines&#10;&#10;Defanged indicators like hxxps://evil[.]com or 1.2.3[.]4 are refanged automatically.&#10;You can also drop a .txt, .log, .csv, .json, .md, .html or .eml file here."></textarea>
+      </div>
+      <div class="opts">
+        <label for="exclude-input">Your domains to exclude</label>
+        <input class="field" id="exclude-input" type="text" spellcheck="false" autocomplete="off" placeholder="yourco.com, yourco.net">
+      </div>
+      <div class="card-foot">
+        <p id="input-status" class="status" aria-live="polite">Waiting for text</p>
+        <button class="btn btn-primary" id="analyze-btn" type="button">Extract IOCs</button>
+      </div>
+    </section>
+
+    <section class="why" aria-label="Why soc-toolkit">
+      <div class="why-item"><h3>15 IOC types</h3><p>IPs, ranges, domains, URLs, emails, hashes, files, paths, registry keys, CVEs and ATT&amp;CK IDs.</p></div>
+      <div class="why-item"><h3>Fewer false positives</h3><p>Skips version numbers, internal IPs, your own domains and well-known services by default.</p></div>
+      <div class="why-item"><h3>Hunt-ready output</h3><p>KQL, SPL, Elastic and CrowdStrike CQL queries, plus CSV, JSON, STIX 2.1 and defanged lists.</p></div>
+    </section>
+
+    <details class="proof">
+      <summary>Why it's safe to paste real reports here</summary>
+      <ul>
+        <li><strong>Processed on your device.</strong> Extraction and query building run as JavaScript in this tab. There is no server and no AI model behind this page.</li>
+        <li><strong>The browser blocks outbound traffic.</strong> A Content Security Policy forbids this page from sending requests or submitting forms, so data cannot leave even by mistake.</li>
+        <li><strong>Lookups are local.</strong> Country, ASN, Tor exit and FireHOL checks use data files shipped with the page. Nothing is queried live.</li>
+        <li><strong>Nothing persists.</strong> No cookies or browser storage. Leaving or reloading the page wipes everything.</li>
+        <li><strong>Verify it yourself.</strong> Open DevTools: the Network tab stays empty after you paste. The full source is <a href="https://github.com/amethyst8174/soctoolkit" rel="noopener noreferrer" target="_blank">on GitHub</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <main id="view-res" class="res hidden" tabindex="-1" aria-label="Extraction results"></main>
+
+  <footer class="footer">
+    <section class="more" aria-labelledby="more-title">
+      <h2 id="more-title">Check out our other utilities</h2>
+      <div class="more-links">
+        <a class="more-link" href="https://amethyst8174.github.io/header-lens/" target="_blank" rel="noopener noreferrer">
+          <strong>Header analysis <span aria-hidden="true">↗</span></strong>
+          <span>Visual email header analysis with a phishing verdict.</span>
+        </a>
+        <a class="more-link" href="https://amethyst8174.github.io/header-lens/triage.html" target="_blank" rel="noopener noreferrer">
+          <strong>Email triage <span aria-hidden="true">↗</span></strong>
+          <span>Full .eml / .msg triage: headers, links, QR codes and attachments.</span>
+        </a>
+      </div>
+    </section>
+    <a class="brand brand-sm" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+      <img src="assets/img/cis-logo.png" alt="" width="28" height="28">
+      <span>Cyber Insight Signals</span>
+    </a>
+    <nav class="links" aria-label="Cyber Insight Signals links">
+      <a href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">YouTube</a>
+      <a href="#" data-link="blog" rel="noopener noreferrer" target="_blank">Security blog</a>
+    </nav>
+    <p class="copy">© <span id="year">2026</span> @CyberInsightSignal. All rights reserved.</p>
+  </footer>
+
+  <script src="js/config.js?v=20261016d"></script>
+  <script src="data/tlds.js?v=20261016d"></script>
+  <script src="js/extract.js?v=20261016d"></script>
+  <script src="js/ipdb.js?v=20261016d"></script>
+  <script src="js/queries.js?v=20261016d"></script>
+  <script src="js/sample.js?v=20261016d"></script>
+  <script src="js/app.js?v=20261016d"></script>
+</body>
+</html>

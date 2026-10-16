@@ -1,12 +1,20 @@
-# soc-toolkit · IOC extractor
+# SOC Toolkit
 
-Paste a threat report, alert, ticket or log and get every indicator of compromise pulled out, refanged, checked and turned into hunt queries. It runs entirely in your browser. There is no AI, no API and no server, and nothing is stored.
+Free, private utilities for SOC analysts and incident responders, by Cyber Insight Signals. Every tool runs entirely in your browser. There is no AI, no API and no server, and nothing is stored.
 
 **Live:** https://amethyst8174.github.io/soctoolkit/
 
-Companion tools: [header-lens](https://amethyst8174.github.io/header-lens/) (email header analysis) and [Email triage](https://amethyst8174.github.io/header-lens/triage.html).
+| Utility | Opens at | What it does |
+|---|---|---|
+| IOC Extractor | `#ioc` (`ioc.html`) | Extracts IOCs from text and builds hunt queries (this repository) |
+| Header-Lens | `#header-lens` | Visual email header analysis ([header-lens](https://github.com/amethyst8174/header-lens)) |
+| Email Triage | `#email-triage` | Full .eml / .msg phishing triage ([header-lens](https://github.com/amethyst8174/header-lens)) |
 
-## What it does
+The home page (`index.html`) lists the utilities and has a collapsible utilities panel on the left. A tool opens inside the same page in a frame from this site, with the panel collapsed. Each tool still works on its own page too.
+
+**Adding a tool:** add one entry to `js/tools.js` (name, short tag, description, icon, page address, accent colour). It then appears in the panel and as a card on the home page. To hide the tool's own top bar and footer inside the toolkit, load `js/embed.js` in its page and add the `.embedded` rules from `css/style.css`.
+
+## IOC Extractor
 
 - **Extracts 15 IOC types:** IPv4, IPv6, CIDR ranges, domains, URLs, email addresses, MD5/SHA1/SHA256/SHA512 hashes, file names, Windows paths, registry keys, CVE IDs and MITRE ATT&CK IDs.
 - **Refangs automatically:** `hxxps://`, `[.]`, `(dot)`, `[@]`, `(at)`, `[://]` and similar.

@@ -25,7 +25,7 @@ for (const name of (process.argv[2] || "chromium").split(",")) {
   const errors = [], external = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("request", (r) => { if (!r.url().startsWith(base)) external.push(r.url()); });
-  await page.goto(base);
+  await page.goto(base + "ioc.html");
   await page.click("#sample-btn");
   await page.click("#analyze-btn");
   await page.waitForSelector(".row", { timeout: 30000 });
