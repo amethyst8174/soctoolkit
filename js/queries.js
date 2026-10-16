@@ -72,23 +72,43 @@
     return out.join("\n\n");
   }
 
-  // ---------- IBM QRadar (AQL) ----------
-  function aql(g, days) {
-    var out = [], last = "LAST " + days + " DAYS";
-    if (g.ips.length) out.push("/* IP addresses */\nSELECT DATEFORMAT(starttime,'yyyy-MM-dd HH:mm') AS time, QIDNAME(qid) AS event, sourceip, destinationip, username, LOGSOURCENAME(logsourceid) AS source\nFROM events WHERE sourceip IN (" + sq(g.ips) + ") OR destinationip IN (" + sq(g.ips) + ")\nORDER BY starttime DESC " + last);
-    if (g.cidrs.length) out.push("/* IP ranges */\nSELECT sourceip, destinationip, QIDNAME(qid) AS event FROM events WHERE " + g.cidrs.map(function (c) { return "INCIDR('" + c + "', destinationip) OR INCIDR('" + c + "', sourceip)"; }).join(" OR ") + " " + last);
-    if (g.domains.length || g.urls.length) out.push("/* Domains and URLs (custom property names vary by log source) */\nSELECT DATEFORMAT(starttime,'yyyy-MM-dd HH:mm') AS time, sourceip, username, \"URL\", LOGSOURCENAME(logsourceid) AS source\nFROM events WHERE " + g.domains.map(function (d) { return "\"URL\" ILIKE '%" + d.replace(/'/g, "''") + "%'"; }).concat(g.urls.map(function (u) { return "\"URL\" = '" + u.replace(/'/g, "''") + "'"; })).join(" OR ") + "\n" + last);
-    if (g.emails.length) out.push("/* Sender addresses */\nSELECT DATEFORMAT(starttime,'yyyy-MM-dd HH:mm') AS time, \"Sender\", \"Recipient\", \"Subject\" FROM events WHERE \"Sender\" IN (" + sq(g.emails) + ") " + last);
-    var hs = g.md5.concat(g.sha1, g.sha256);
-    if (hs.length) out.push("/* File hashes */\nSELECT DATEFORMAT(starttime,'yyyy-MM-dd HH:mm') AS time, sourceip, username, \"Filename\", \"File Hash\" FROM events WHERE \"File Hash\" IN (" + sq(hs) + ") OR \"SHA256 Hash\" IN (" + sq(g.sha256) + ") OR \"MD5 Hash\" IN (" + sq(g.md5) + ") " + last);
-    if (g.files.length || g.paths.length) out.push("/* File names */\nSELECT DATEFORMAT(starttime,'yyyy-MM-dd HH:mm') AS time, sourceip, username, \"Filename\", \"Process Name\" FROM events WHERE LOWER(\"Filename\") IN (" + sq(uniq(g.files.concat(g.paths.map(base))).map(function (x) { return x.toLowerCase(); })) + ") " + last);
+  // ---------- CrowdStrike Falcon / LogScale (CQL) ----------
+  // Endpoint blocks use Falcon telemetry fields; "third-party" blocks use the ECS-style
+  // fields Next-Gen SIEM parsers produce for firewall, proxy and email logs.
+  function cql(g) {
+    var out = [];
+    var rxEsc = function (v) { return String(v).replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&"); };
+    var rx = function (a, flags) { return "/^(" + a.map(rxEsc).join("|") + ")$/" + (flags || ""); };
+    var vals = function (a) { return "[" + dq(a) + "]"; };
+    var v4 = g.ips.filter(function (v) { return v.indexOf(":") < 0; }), v6 = g.ips.filter(function (v) { return v.indexOf(":") > -1; });
+    if (v4.length) out.push("// IPv4 addresses: Falcon endpoint network connections\n#event_simpleName=NetworkConnectIP4\n| in(field=RemoteAddressIP4, values=" + vals(v4) + ")\n| table([@timestamp, ComputerName, aid, RemoteAddressIP4, RemotePort, ContextBaseFileName], limit=1000)");
+    if (v6.length) out.push("// IPv6 addresses: Falcon endpoint network connections\n#event_simpleName=NetworkConnectIP6\n| in(field=RemoteAddressIP6, values=" + vals(v6) + ")\n| table([@timestamp, ComputerName, aid, RemoteAddressIP6, RemotePort, ContextBaseFileName], limit=1000)");
+    if (g.ips.length) out.push("// IP addresses: third-party firewall, proxy and sign-in logs\nsource.ip=" + rx(g.ips, "i") + " or destination.ip=" + rx(g.ips, "i") + "\n| table([@timestamp, #Vendor, source.ip, destination.ip, user.name, event.action], limit=1000)");
+    if (g.cidrs.length) out.push("// IP ranges: Falcon endpoint network connections\n#event_simpleName=NetworkConnectIP4\n| cidr(RemoteAddressIP4, subnet=" + vals(g.cidrs) + ")\n| table([@timestamp, ComputerName, aid, RemoteAddressIP4, RemotePort, ContextBaseFileName], limit=1000)");
+    if (g.domains.length) {
+      var drx = "/(^|\\.)(" + g.domains.map(rxEsc).join("|") + ")$/i";
+      out.push("// Domains: Falcon endpoint DNS requests (includes subdomains)\n#event_simpleName=DnsRequest\n| DomainName=" + drx + "\n| table([@timestamp, ComputerName, aid, DomainName, ContextBaseFileName], limit=1000)");
+      out.push("// Domains: third-party proxy and DNS logs\nurl.domain=" + drx + " or dns.question.name=" + drx + " or destination.domain=" + drx + "\n| table([@timestamp, #Vendor, source.ip, user.name, url.domain, dns.question.name, url.original], limit=1000)");
+    }
+    if (g.urls.length) out.push("// URLs: third-party proxy and email logs\nurl.original=" + rx(g.urls, "i") + "\n| table([@timestamp, #Vendor, source.ip, user.name, url.original, event.action], limit=1000)");
+    if (g.emails.length) out.push("// Sender addresses: third-party email logs\nemail.from.address=" + rx(g.emails, "i") + " or email.sender.address=" + rx(g.emails, "i") + "\n| table([@timestamp, #Vendor, email.from.address, email.to.address, email.subject, event.action], limit=1000)");
+    var hp = [];
+    if (g.sha256.length) hp.push("SHA256HashData=" + rx(g.sha256, "i"));
+    if (g.sha1.length) hp.push("SHA1HashData=" + rx(g.sha1, "i"));
+    if (g.md5.length) hp.push("MD5HashData=" + rx(g.md5, "i"));
+    if (hp.length) out.push("// File hashes: Falcon process and file events\n" + hp.join(" or ") + "\n| table([@timestamp, ComputerName, aid, #event_simpleName, FileName, FilePath, SHA256HashData, CommandLine], limit=1000)");
+    if (g.files.length || g.paths.length) out.push("// File names: Falcon process and file-write events\n#event_simpleName=/ProcessRollup2|FileWritten/\n| FileName=" + rx(uniq(g.files.concat(g.paths.map(base))), "i") + "\n| table([@timestamp, ComputerName, aid, #event_simpleName, FileName, FilePath, CommandLine], limit=1000)");
+    if (g.registry.length) out.push("// Registry keys: Falcon registry and autostart events (the last segment may be a value name)\n#event_simpleName=/^(AsepValueUpdate|RegGenericValueUpdate|RegSystemConfigValueUpdate|RegKeyCreate)$/\n| RegObjectName=/(" + g.registry.map(function (k) {
+      var parts = k.replace(/^[^\\]+\\/, "").split("\\"), last = parts.pop();
+      return parts.map(rxEsc).join("\\\\") + "(\\\\" + rxEsc(last) + ")?";
+    }).join("|") + ")$/i\n| table([@timestamp, ComputerName, aid, RegObjectName, RegValueName, RegStringValue], limit=1000)");
     return out.join("\n\n");
   }
 
   function build(items, days) {
     var g = group(items);
     days = days || 30;
-    return { kql: kql(g, days), spl: spl(g, days), elastic: elastic(g), aql: aql(g, days), groups: g };
+    return { kql: kql(g, days), spl: spl(g, days), elastic: elastic(g), cql: cql(g), groups: g };
   }
 
   // ---------- Exports ----------

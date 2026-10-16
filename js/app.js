@@ -64,7 +64,7 @@
     });
   }
   function loadData() {
-    if (!dataPromise) dataPromise = Promise.all(["data/world.js", "data/threat.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016b"); }))
+    if (!dataPromise) dataPromise = Promise.all(["data/world.js", "data/threat.js", "data/geo.js"].map(function (s) { return addScript(s + "?v=20261016c"); }))
       .then(function () { return G.load(); }).catch(function () { return null; });
     return dataPromise;
   }
@@ -246,8 +246,8 @@
   }
 
   // ---------- Output ----------
-  var PLATS = [["kql", "Sentinel / Defender", "KQL"], ["spl", "Splunk", "SPL"], ["elastic", "Elastic", "KQL"], ["aql", "QRadar", "AQL"]];
-  var EXT = { kql: "kql", spl: "spl", elastic: "txt", aql: "aql" };
+  var PLATS = [["kql", "Sentinel / Defender", "KQL"], ["spl", "Splunk", "SPL"], ["elastic", "Elastic", "KQL"], ["cql", "CrowdStrike / LogScale", "CQL"]];
+  var EXT = { kql: "kql", spl: "spl", elastic: "txt", cql: "cql" };
 
   function copyText(text, btn) {
     var done = function (ok) { var o = btn.textContent; btn.textContent = ok ? "Copied" : "Copy failed"; setTimeout(function () { btn.textContent = o; }, 1400); };
@@ -291,11 +291,11 @@
     var dlBtn = h("button", { class: "btn btn-ghost btn-sm", type: "button", text: "Download", on: { click: function () { download("hunt-" + S.plat + "-" + stamp() + "." + EXT[S.plat], q); } } });
     els.out.appendChild(plats);
     els.out.appendChild(h("div", { class: "qopts" }, [
-      S.plat === "elastic" ? h("span", { class: "sel-info", text: "Set the time range in Kibana's time picker" }) : days,
+      S.plat === "elastic" || S.plat === "cql" ? h("span", { class: "sel-info", text: "Set the time range in " + (S.plat === "cql" ? "the Falcon / LogScale" : "Kibana's") + " time picker" }) : days,
       hasQ ? h("div", { class: "actions" }, [copyBtn, dlBtn]) : null
     ]));
     els.out.appendChild(hasQ ? h("pre", { class: "code", tabindex: "0" }, [h("code", { text: q })]) : h("p", { class: "empty", text: "The ticked indicators are CVEs or ATT&CK IDs only, which have no log fields to hunt on. Tick IPs, domains, URLs, emails, hashes, files or registry keys." }));
-    els.out.appendChild(h("p", { class: "note", text: "Field and table names follow each platform's defaults (Defender XDR and Sentinel tables, Splunk CIM, Elastic ECS, QRadar). Adjust them to match your data sources before running." }));
+    els.out.appendChild(h("p", { class: "note", text: "Field and table names follow each platform's defaults (Defender XDR and Sentinel tables, Splunk CIM, Elastic ECS, CrowdStrike Falcon telemetry and Next-Gen SIEM ECS fields). Adjust them to match your data sources before running." }));
   }
 
   function renderExport(sel) {

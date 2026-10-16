@@ -12,7 +12,7 @@ Companion tools: [header-lens](https://amethyst8174.github.io/header-lens/) (ema
 - **Refangs automatically:** `hxxps://`, `[.]`, `(dot)`, `[@]`, `(at)`, `[://]` and similar.
 - **Cuts false positives:** checks domains against the IANA TLD list, and skips version numbers, clock times and placeholder hashes. Internal IPs, reserved domains, well-known services, empty-file hashes and your own domains start unticked.
 - **Enriches offline:** adds country and ASN for public IPs, and flags Tor exit nodes and FireHOL level 1 matches, all from data files shipped with the page.
-- **Writes hunt queries** for Microsoft Sentinel / Defender XDR (KQL), Splunk (SPL, CIM fields), Elastic (KQL, ECS fields) and IBM QRadar (AQL), with a selectable time range.
+- **Writes hunt queries** for Microsoft Sentinel / Defender XDR (KQL), Splunk (SPL, CIM fields), Elastic (KQL, ECS fields) and CrowdStrike Falcon / LogScale (CQL, Falcon telemetry and Next-Gen SIEM fields), with a selectable time range for KQL and SPL.
 - **Exports** CSV (formula-injection safe), JSON, a STIX 2.1 bundle with deterministic IDs, and defanged or plain lists.
 - **Gives deterministic results:** the same text always gives the same indicators, queries and exports. The page shows the input's SHA-256, the engine version and the data dates.
 

@@ -31,7 +31,7 @@ for (const name of (process.argv[2] || "chromium").split(",")) {
   await page.waitForSelector(".row", { timeout: 30000 });
   const rows = await page.$$eval(".row", (rs) => rs.map((r) => [r.querySelector(".tbadge").textContent, r.querySelector(".rval").textContent, r.querySelector("input").checked, [...r.querySelectorAll(".pill")].map((p) => p.textContent).join("|")].join(" ")));
   const queries = [];
-  for (const plat of ["Sentinel", "Splunk", "Elastic", "QRadar"]) { await page.click(`.plat:has-text("${plat}")`); queries.push(await page.textContent("pre.code")); }
+  for (const plat of ["Sentinel", "Splunk", "Elastic", "CrowdStrike"]) { await page.click(`.plat:has-text("${plat}")`); queries.push(await page.textContent("pre.code")); }
   results[name] = JSON.stringify({ rows, queries });
   console.log(`${name}: ${rows.length} indicators, ${errors.length} errors, ${external.length} external requests`);
   if (errors.length || external.length) { failed = true; console.error(errors, external); }

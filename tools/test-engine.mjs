@@ -23,7 +23,7 @@ function snapshot() {
   return {
     engine: res.version,
     items: res.items.map((i) => [i.type, i.value, i.count, i.line, i.include, i.tags.map((t) => t.k).join(",")]),
-    queries: { kql: sha(q.kql), spl: sha(q.spl), elastic: sha(q.elastic), aql: sha(q.aql) },
+    queries: { kql: sha(q.kql), spl: sha(q.spl), elastic: sha(q.elastic), cql: sha(q.cql) },
     stix: sha(Q.stix(sel, "2026-01-01T00:00:00Z")),
     csv: sha(Q.csv(sel)),
     defanged: Q.plain(sel, true).split("\n"),
