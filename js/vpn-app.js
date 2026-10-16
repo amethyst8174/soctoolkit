@@ -10,7 +10,7 @@
   var viewInput = $("view-input"), viewRes = $("view-res");
   var MAX_BYTES = 5 * 1024 * 1024, MAX_IPS = 10000, MAX_ROWS = 2000;
   var SAMPLE = "Sign-in alerts, last 24 hours\n" +
-    "185.220.101[.]45  Tor\n2.26.157.10  user: j.doe\n5.231.192.20  user: a.khan\n49.36.12.7  user: r.iyer\n" +
+    "185.220.101[.]45  Tor\n172.225.184.197  user: m.lee (iPhone)\n2.26.157.10  user: j.doe\n5.231.192.20  user: a.khan\n49.36.12.7  user: r.iyer\n" +
     "10.20.30.41  VPN gateway (internal)\n2a0d:5600:24:a1::7\n2001:550:1d05::10\n";
 
   // Brand links from config; hide any left empty.

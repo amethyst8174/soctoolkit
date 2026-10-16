@@ -69,9 +69,9 @@
   // ---------- Classification ----------
   var RULES = [
     { id: "tor", status: "Tor exit node", confidence: "High",
-      why: "Listed by the Tor Project as a Tor exit node as of the list date shown in "Lists checked"." },
+      why: "Listed by the Tor Project as a Tor exit node as of the list date shown under Lists checked." },
     { id: "icloud", status: "iCloud Private Relay", confidence: "High",
-      why: "Listed by Apple as an iCloud Private Relay egress range as of the list date shown in "Lists checked"." },
+      why: "Listed by Apple as an iCloud Private Relay egress range as of the list date shown under Lists checked." },
     { id: "vpn", status: "VPN network", confidence: "Medium",
       why: "In X4B's curated list of known VPN networks. The list is built mainly from network ownership, so this exact address could be another service on the same network." }
   ];

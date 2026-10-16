@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: 22
       - run: node tools/test-engine.mjs
+      - run: for f in js/*.js; do node --check "$f"; done
       - run: node tools/test-vpn.mjs
 
   cross-browser:
