@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Privacy enforcement: the browser blocks every outbound request and form submission from this page. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>DecodeSphere · SOC Toolkit</title>
+  <meta name="description" content="Deobfuscate PowerShell and Windows command lines: Base64 -EncodedCommand, gzip payloads, hex, char codes, caret and set-variable tricks. Peels every layer, flags behaviour and pulls IOCs, entirely in your browser.">
+  <link rel="icon" type="image/png" href="assets/img/decoder.png">
+  <link rel="stylesheet" href="css/style.css?v=20261017a">
+  <script src="js/embed.js?v=20261017a"></script>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="SOC Toolkit home">
+      <img src="assets/img/decoder.png" alt="" width="28" height="28">
+      <span>soc<em>-toolkit</em></span>
+    </a>
+    <div class="topbar-r">
+      <nav class="share" aria-label="Share soc-toolkit">
+        <span class="share-l">Share</span>
+        <a class="share-btn share-li" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23decoder" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn" aria-label="Share on LinkedIn"><span aria-hidden="true">in</span></a>
+        <a class="share-btn share-x" href="https://x.com/intent/post?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23decoder&amp;text=PowerShell%20and%20command-line%20decoder%20that%20runs%20entirely%20in%20your%20browser" target="_blank" rel="noopener noreferrer" title="Share on X (Twitter)" aria-label="Share on X (Twitter)"><span aria-hidden="true">X</span></a>
+        <a class="share-btn share-fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23decoder" target="_blank" rel="noopener noreferrer" title="Share on Facebook" aria-label="Share on Facebook"><span aria-hidden="true">f</span></a>
+      </nav>
+      <a class="brand" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+        <img src="assets/img/cis-logo.png" alt="Cyber Insight Signals logo" width="36" height="36">
+        <span class="brand-text">
+          <strong>Cyber Insight Signals</strong>
+          <small>Translating Cyber Chaos into Clarity</small>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main id="view-input">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">DecodeSphere</p>
+        <h1>Decode<span>Sphere</span></h1>
+        <p class="lede">Paste an obfuscated PowerShell one-liner or a full process command line and get the real command back. It peels Base64 <code>-EncodedCommand</code>, gzip payloads, hex, character codes, caret and <code>set</code>-variable tricks one layer at a time, then flags the behaviour and pulls out the IOCs. Everything runs in your browser, and nothing is uploaded, looked up online or stored.</p>
+        <ul class="trust" aria-label="Privacy guarantees">
+          <li><span class="tdot tdot-v" aria-hidden="true"></span>Decoding runs offline in your browser</li>
+          <li><span class="tdot tdot-m" aria-hidden="true"></span>Payloads are never sent anywhere</li>
+          <li><span class="tdot tdot-a" aria-hidden="true"></span>Nothing is stored</li>
+        </ul>
+      </div>
+      <div class="hero-art">
+        <img src="assets/img/decoder.png" alt="A 3D terminal window with a magnifying glass decoding scrambled code" width="200" height="200">
+      </div>
+    </section>
+
+    <section class="card input-card" aria-labelledby="input-title">
+      <div class="card-head">
+        <h2 id="input-title">Paste a command</h2>
+        <div class="tools">
+          <label class="btn btn-ghost" for="file-input">Open file</label>
+          <input id="file-input" type="file" accept=".txt,.log,.csv,.tsv,.json,.md,.xml,.ps1,.bat,.cmd,text/*,application/json" hidden>
+          <button class="btn btn-ghost" id="sample-btn" type="button">Try a sample</button>
+          <button class="btn btn-ghost" id="clear-btn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="drop" id="drop-zone">
+        <textarea id="text-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-describedby="input-status"
+          placeholder="Paste an obfuscated command, e.g.&#10;&#10;powershell -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQA...&#10;&#10;Or a whole EDR / Sysmon process command line. You can also drop a .ps1, .bat, .log or .txt file here."></textarea>
+      </div>
+      <div class="opts">
+        <label for="mode-sel">Decoder</label>
+        <select class="field" id="mode-sel" aria-label="Choose how to decode">
+          <option value="auto">Auto-detect &amp; peel all layers</option>
+          <option value="encodedcommand">PowerShell -EncodedCommand (Base64)</option>
+          <option value="base64">Base64</option>
+          <option value="gzip">Gzip / Deflate + Base64</option>
+          <option value="hex">Hex (\xNN or pairs)</option>
+          <option value="charcodes">Character codes</option>
+          <option value="url">URL / percent encoding</option>
+          <option value="unicode">Unicode escapes (\uXXXX)</option>
+          <option value="caret">cmd caret escaping</option>
+          <option value="cmdvars">cmd set-variable</option>
+          <option value="ps">PowerShell string tricks</option>
+          <option value="reverse">Reverse string</option>
+          <option value="rot13">ROT13</option>
+          <option value="xor">XOR (key or brute force)</option>
+        </select>
+        <span id="xor-wrap" hidden>
+          <input class="field" id="xor-key" type="text" placeholder="XOR key: text, 0x4d, or 4d 2a (blank = brute force)" aria-label="XOR key" autocomplete="off" spellcheck="false">
+        </span>
+      </div>
+      <div class="card-foot">
+        <p id="input-status" class="status" aria-live="polite">Waiting for input</p>
+        <button class="btn btn-primary" id="analyze-btn" type="button">Decode</button>
+      </div>
+    </section>
+
+    <section class="why" aria-label="How DecodeSphere works">
+      <div class="why-item"><h3>Peels every layer</h3><p>Obfuscation is stacked: a caret-escaped <code>cmd</code> wrapping a Base64 <code>-enc</code> wrapping a gzip blob. The decoder applies one transform at a time and shows the whole chain, so you see exactly how it was hidden.</p></div>
+      <div class="why-item"><h3>Flags the behaviour</h3><p>The decoded command is scanned for download cradles, <code>IEX</code>, reflection, LOLBins, Defender tampering and persistence, each marked High, Suspicious or Note.</p></div>
+      <div class="why-item"><h3>Hands you the IOCs</h3><p>URLs, IPs, domains, UNC and file paths and registry keys are pulled from the result and ready to copy straight into a hunt.</p></div>
+    </section>
+
+    <details class="proof">
+      <summary>Why it's safe to decode confidential payloads here</summary>
+      <ul>
+        <li><strong>Processed on your device.</strong> Every transform, including gzip decompression, runs as code in your browser tab. The command you paste is never uploaded to any service.</li>
+        <li><strong>The browser blocks outbound traffic.</strong> A Content Security Policy forbids this page from sending requests or submitting forms, so data cannot leave even by mistake.</li>
+        <li><strong>Nothing persists.</strong> No accounts, cookies or browser storage. Leaving or reloading the page wipes everything.</li>
+        <li><strong>Decoding only.</strong> The tool reads and transforms text. It never runs, executes or reaches out to anything it decodes.</li>
+        <li><strong>Verify it yourself.</strong> Open DevTools: the Network tab stays empty while you work. The full source is <a href="https://github.com/amethyst8174/soctoolkit" rel="noopener noreferrer" target="_blank">on GitHub</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <main id="view-res" class="res hidden" tabindex="-1" aria-label="Decode results"></main>
+
+  <footer class="footer">
+    <section class="more" aria-labelledby="more-title">
+      <h2 id="more-title">Check out our other utilities</h2>
+      <div class="more-links">
+        <a class="more-link" href="ioc.html" data-shell="ioc" data-shell-base="./">
+          <strong>IOC Extractor <span aria-hidden="true">↗</span></strong>
+          <span>Pull IOCs from a report and get ready-made hunt queries.</span>
+        </a>
+        <a class="more-link" href="vpn.html" data-shell="vpn-check" data-shell-base="./">
+          <strong>VPN IP Checker <span aria-hidden="true">↗</span></strong>
+          <span>Check IPs for VPN, Tor or iCloud Private Relay, offline.</span>
+        </a>
+      </div>
+    </section>
+    <a class="brand brand-sm" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+      <img src="assets/img/cis-logo.png" alt="" width="28" height="28">
+      <span>Cyber Insight Signals</span>
+    </a>
+    <nav class="links" aria-label="Cyber Insight Signals links">
+      <a href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">YouTube</a>
+      <a href="#" data-link="blog" rel="noopener noreferrer" target="_blank">Security blog</a>
+    </nav>
+    <p class="copy">© <span id="year">2026</span> @CyberInsightSignal. All rights reserved.</p>
+  </footer>
+
+  <script src="js/config.js?v=20261017a"></script>
+  <script src="data/tlds.js?v=20261017a"></script>
+  <script src="js/queries.js?v=20261017a"></script>
+  <script src="js/decoder.js?v=20261017a"></script>
+</body>
+</html>

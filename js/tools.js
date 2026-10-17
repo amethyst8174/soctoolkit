@@ -28,6 +28,12 @@ window.SOC_TOOLS = [
     share: "Phishing email triage that runs entirely in your browser"
   },
   {
+    id: "decoder", name: "DecodeSphere", tag: "PowerShell & cmd deobfuscation",
+    desc: "Paste an obfuscated PowerShell or Windows command line and peel it layer by layer: Base64 -EncodedCommand, gzip, hex, char codes and caret tricks, with behaviour flags and hunt queries for Sentinel, Splunk, Elastic and CrowdStrike.",
+    icon: "assets/img/decoder.png", url: "decoder.html", color: "var(--info)",
+    share: "DecodeSphere: PowerShell and command-line decoder that runs entirely in your browser"
+  },
+  {
     id: "vpn-check", name: "VPN IP Checker", tag: "VPN, Tor and Private Relay",
     desc: "Check whether IP addresses belong to a VPN, Tor or iCloud Private Relay using published lists, with a source and confidence level for every answer.",
     icon: "assets/img/vpn.png", url: "vpn.html", color: "var(--ok)",
