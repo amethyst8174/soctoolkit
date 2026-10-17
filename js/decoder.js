@@ -771,7 +771,10 @@
     vi.classList.remove("hidden");
     document.body.classList.remove("is-res");
     window.scrollTo(0, 0);
-    document.getElementById("text-input").focus();
+    // Start fresh: clear the pasted command and reset the status line.
+    var input = document.getElementById("text-input");
+    if (input) { input.value = ""; input.dispatchEvent(new Event("input")); }
+    if (input) input.focus();
   }
 
   function bind() {
