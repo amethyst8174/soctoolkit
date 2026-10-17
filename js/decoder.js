@@ -625,7 +625,7 @@
     grid.appendChild(left);
 
     // ---- right column ----
-    var right = h("div", { class: "col out-card" });
+    var right = h("div", { class: "col" });
 
     // flags
     var flagInner = h("div", {});
