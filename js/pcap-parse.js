@@ -85,34 +85,75 @@
     return { name: name, end: end };
   }
 
-  // ---- TLS ClientHello SNI ----
-  function tlsSni(b, off, len) {
-    var e = off + len;
-    if (off + 6 > e) return null;
-    if (b[off] !== 0x16 || b[off + 1] !== 0x03) return null;       // handshake, TLS 1.x
-    if (b[off + 5] !== 0x01) return null;                          // ClientHello
-    var p = off + 5 + 4;                                           // skip record(5) + handshake type(1)+len(3)
-    p += 2 + 32;                                                   // client version + random
-    if (p >= e) return null;
-    var sidLen = b[p]; p += 1 + sidLen;
-    if (p + 2 > e) return null;
-    var csLen = (b[p] << 8) | b[p + 1]; p += 2 + csLen;
-    if (p >= e) return null;
-    var compLen = b[p]; p += 1 + compLen;
-    if (p + 2 > e) return null;
-    var extTotal = (b[p] << 8) | b[p + 1]; p += 2;
-    var extEnd = Math.min(e, p + extTotal);
-    while (p + 4 <= extEnd) {
-      var type = (b[p] << 8) | b[p + 1], l = (b[p + 2] << 8) | b[p + 3]; p += 4;
-      if (type === 0x0000) { // server_name
-        if (p + 5 > extEnd) return null;
-        var nameLen = (b[p + 3] << 8) | b[p + 4];
-        var s = ascii(b, p + 5, nameLen);
-        return /^[A-Za-z0-9.\-_]+$/.test(s) ? s : null;
+  // ---- MD5 (for JA3/JA3S); operates on an ASCII string ----
+  var MD5_K = [0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821, 0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8, 0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed, 0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a, 0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c, 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70, 0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665, 0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391];
+  var MD5_S = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21];
+  function md5(str) {
+    function rl(n, s) { return (n << s) | (n >>> (32 - s)); }
+    function add(a, b) { return (a + b) & 0xffffffff; }
+    var bytes = []; for (var i = 0; i < str.length; i++) bytes.push(str.charCodeAt(i) & 0xff);
+    var olen = bytes.length; bytes.push(0x80);
+    while (bytes.length % 64 !== 56) bytes.push(0);
+    var bl = olen * 8; for (i = 0; i < 8; i++) { bytes.push(bl & 0xff); bl = Math.floor(bl / 256); }
+    var a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+    for (var ch = 0; ch < bytes.length; ch += 64) {
+      var M = []; for (var j = 0; j < 16; j++) M[j] = bytes[ch + j * 4] | (bytes[ch + j * 4 + 1] << 8) | (bytes[ch + j * 4 + 2] << 16) | (bytes[ch + j * 4 + 3] << 24);
+      var A = a0, B = b0, C = c0, D = d0;
+      for (i = 0; i < 64; i++) {
+        var F, g;
+        if (i < 16) { F = (B & C) | (~B & D); g = i; }
+        else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+        else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+        else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+        F = add(add(add(F, A), MD5_K[i]), M[g]); A = D; D = C; C = B; B = add(B, rl(F, MD5_S[i]));
       }
-      p += l;
+      a0 = add(a0, A); b0 = add(b0, B); c0 = add(c0, C); d0 = add(d0, D);
     }
-    return null;
+    function hx(n) { var s = ""; for (var k = 0; k < 4; k++) s += ("0" + ((n >>> (k * 8)) & 0xff).toString(16)).slice(-2); return s; }
+    return hx(a0) + hx(b0) + hx(c0) + hx(d0);
+  }
+  function isGrease(v) { return ((v & 0x0f0f) === 0x0a0a) && (((v >> 8) & 0xff) === (v & 0xff)); }
+
+  // ---- TLS ClientHello / ServerHello: SNI + JA3 / JA3S ----
+  function tlsParse(b, off, len) {
+    var e = off + len;
+    if (off + 6 > e || b[off] !== 0x16 || b[off + 1] !== 0x03) return null;
+    var hsType = b[off + 5];
+    if (hsType !== 0x01 && hsType !== 0x02) return null;
+    var p = off + 5;
+    var hsEnd = Math.min(e, p + 4 + ((b[p + 1] << 16) | (b[p + 2] << 8) | b[p + 3]));
+    p += 4;
+    if (p + 34 > hsEnd) return null;
+    var version = (b[p] << 8) | b[p + 1]; p += 2 + 32;
+    var sidLen = b[p]; p += 1 + sidLen;
+    if (hsType === 0x01) {
+      if (p + 2 > hsEnd) return null;
+      var csLen = (b[p] << 8) | b[p + 1]; p += 2; var csEnd = Math.min(hsEnd, p + csLen);
+      var ciphers = []; for (; p + 1 < csEnd; p += 2) { var c = (b[p] << 8) | b[p + 1]; if (!isGrease(c)) ciphers.push(c); }
+      p = csEnd; if (p >= hsEnd) return null;
+      var compLen = b[p]; p += 1 + compLen;
+      var exts = [], curves = [], points = [], sni = null;
+      if (p + 2 <= hsEnd) {
+        var extTotal = (b[p] << 8) | b[p + 1]; p += 2; var extEnd = Math.min(hsEnd, p + extTotal);
+        while (p + 4 <= extEnd) {
+          var t = (b[p] << 8) | b[p + 1], l = (b[p + 2] << 8) | b[p + 3]; p += 4; var body = p, bodyEnd = Math.min(extEnd, p + l);
+          if (!isGrease(t)) exts.push(t);
+          if (t === 0x0000) { if (body + 5 <= bodyEnd) { var nl = (b[body + 3] << 8) | b[body + 4]; var s = ascii(b, body + 5, nl); if (/^[A-Za-z0-9.\-_]+$/.test(s)) sni = s; } }
+          else if (t === 0x000a) { if (body + 2 <= bodyEnd) { var gl = (b[body] << 8) | b[body + 1]; for (var q = body + 2; q + 1 < body + 2 + gl && q + 1 < bodyEnd; q += 2) { var cv = (b[q] << 8) | b[q + 1]; if (!isGrease(cv)) curves.push(cv); } } }
+          else if (t === 0x000b) { if (body + 1 <= bodyEnd) { var pl = b[body]; for (var q2 = body + 1; q2 < body + 1 + pl && q2 < bodyEnd; q2++) points.push(b[q2]); } }
+          p = bodyEnd;
+        }
+      }
+      var ja3str = version + "," + ciphers.join("-") + "," + exts.join("-") + "," + curves.join("-") + "," + points.join("-");
+      return { type: "client", sni: sni, ja3: md5(ja3str), ja3str: ja3str };
+    } else {
+      if (p + 3 > hsEnd) return null;
+      var cipher = (b[p] << 8) | b[p + 1]; p += 2 + 1;
+      var exts2 = [];
+      if (p + 2 <= hsEnd) { var et = (b[p] << 8) | b[p + 1]; p += 2; var ee = Math.min(hsEnd, p + et); while (p + 4 <= ee) { var tt = (b[p] << 8) | b[p + 1], ll = (b[p + 2] << 8) | b[p + 3]; p += 4; if (!isGrease(tt)) exts2.push(tt); p = Math.min(ee, p + ll); } }
+      var ja3sstr = version + "," + cipher + "," + exts2.join("-");
+      return { type: "server", ja3s: md5(ja3sstr), ja3sstr: ja3sstr };
+    }
   }
 
   var HTTP_METHODS = ["GET ", "POST ", "HEAD ", "PUT ", "DELETE ", "OPTIONS ", "PATCH ", "CONNECT ", "TRACE "];
@@ -160,6 +201,7 @@
       flows: {}, flowCount: 0, flowOverflow: 0,
       dns: {}, dnsCount: 0, nx: 0, dnsTypes: {},
       sni: {}, sniCount: 0,
+      ja3: {}, ja3Count: 0, ja3s: {}, ja3sCount: 0,
       httpHosts: {}, httpUrls: {}, httpCount: 0,
       scan: {},               // srcip -> {dsts:{}, ndst, ports:{}, nport, first, last}
       ftpCreds: [], smbv1: false, smb2: false, cleartextHttpBytes: 0,
@@ -318,7 +360,15 @@
     if (proto === "tcp") {
       if (dport === 443 || sport === 443 || dport === 8443 || sport === 8443) {
         chart = "tls";
-        if (payLen > 6) { var sni = tlsSni(b, payOff, payLen); if (sni) this._name(S.sni, "sniCount", sni); }
+        if (payLen > 6) {
+          var tls = tlsParse(b, payOff, payLen);
+          if (tls) {
+            var srv = (dport === 443 || dport === 8443) ? dst : src;
+            if (tls.sni) this._name(S.sni, "sniCount", tls.sni);
+            if (tls.ja3) this._fp(S.ja3, "ja3Count", tls.ja3, srv, tls.sni);
+            if (tls.ja3s) this._fp(S.ja3s, "ja3sCount", tls.ja3s, srv, "");
+          }
+        }
       } else if (dport === 80 || sport === 80 || dport === 8080 || sport === 8080 || dport === 8000) {
         var hr = payLen > 8 ? httpReq(b, payOff, payLen) : null;
         if (hr) { chart = "http"; this._http(hr); if (!dstPriv) S.cleartextHttpBytes += origlen; }
@@ -346,6 +396,11 @@
     var S = this.S;
     if (map[name] === undefined) { if (S[counter] >= this.caps.maxNames) return; S[counter]++; }
     map[name] = (map[name] || 0) + 1;
+  };
+  Parser.prototype._fp = function (map, counter, hash, dst, sni) {
+    var S = this.S, f = map[hash];
+    if (!f) { if (S[counter] >= 3000) return; S[counter]++; f = map[hash] = { count: 0, dst: dst || "", sni: sni || "" }; }
+    f.count++; if (!f.dst && dst) f.dst = dst; if (!f.sni && sni) f.sni = sni;
   };
   Parser.prototype._dns = function (b, h, end) {
     // h = start of the DNS header (id,flags,counts); question follows at h+12.
@@ -505,6 +560,7 @@
     services.sort(function (a, b) { return b.bytes - a.bytes; });
 
     function topMap(m, n) { return Object.keys(m).map(function (k) { return { name: k, count: m[k] }; }).sort(function (a, b) { return b.count - a.count; }).slice(0, n); }
+    function topFp(m, n) { return Object.keys(m).map(function (k) { return { hash: k, count: m[k].count, dst: m[k].dst, sni: m[k].sni }; }).sort(function (a, b) { return b.count - a.count; }).slice(0, n); }
 
     // scan summary
     var scans = Object.keys(S.scan).map(function (k) { var s = S.scan[k]; return { src: k, ndst: s.ndst, nport: s.nport, window: Math.max(0, s.last - s.first) }; })
@@ -534,6 +590,7 @@
       services: services,
       dns: topMap(S.dns, 200), dnsTotal: S.dnsCount, dnsTypes: S.dnsTypes, nx: S.nx,
       sni: topMap(S.sni, 200), sniTotal: S.sniCount,
+      ja3: topFp(S.ja3, 50), ja3Total: S.ja3Count, ja3s: topFp(S.ja3s, 50), ja3sTotal: S.ja3sCount,
       httpHosts: topMap(S.httpHosts, 100), httpUrls: topMap(S.httpUrls, 100),
       scans: scans,
       ftpCreds: S.ftpCreds, smbv1: S.smbv1, smb2: S.smb2, cleartextHttpBytes: S.cleartextHttpBytes
