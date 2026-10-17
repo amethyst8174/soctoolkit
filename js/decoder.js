@@ -622,12 +622,7 @@
       left.appendChild(card("Indicators", h("p", { class: "empty", text: "No URLs, IPs, domains or paths found in the decoded text." })));
     }
 
-    grid.appendChild(left);
-
-    // ---- right column ----
-    var right = h("div", { class: "col" });
-
-    // flags
+    // Behaviour (left column, after Indicators)
     var flagInner = h("div", {});
     if (flags.length) {
       flags.forEach(function (f) {
@@ -639,9 +634,9 @@
     } else {
       flagInner.appendChild(h("p", { class: "empty", text: "No known suspicious tokens in the decoded text." }));
     }
-    right.appendChild(card("Behaviour", flagInner));
+    left.appendChild(card("Behaviour", flagInner));
 
-    // parsed command line
+    // Parsed command line (left column, after Behaviour)
     if (cmd) {
       var clInner = h("div", {});
       clInner.appendChild(h("div", { class: "clrow clexe" }, [h("span", { class: "tbadge", color: "var(--magenta)", text: "EXE" }), h("span", { class: "rval", text: cmd.exe })]));
@@ -653,15 +648,17 @@
           ]));
         });
       } else clInner.appendChild(h("p", { class: "note", text: "No switches on this command." }));
-      right.appendChild(card("Command line", clInner));
+      left.appendChild(card("Command line", clInner));
     }
 
+    grid.appendChild(left);
+
+    // ---- right column: hunting queries, sticky like the IOC Extractor so switching
+    // platform tabs scrolls inside the code block instead of reflowing the page ----
+    var right = h("div", { class: "col out-card" });
+    right.appendChild(renderQueries(iocToItems(iocs)));
     grid.appendChild(right);
     view.appendChild(grid);
-
-    // Hunting queries for Sentinel / Splunk / Elastic / CrowdStrike, from the decoded IOCs.
-    var qItems = iocToItems(iocs);
-    if (qItems.length) view.appendChild(renderQueries(qItems));
 
     document.getElementById("view-input").classList.add("hidden");
     view.classList.remove("hidden");
@@ -702,6 +699,7 @@
   function renderQueries(items) {
     var Q = queriesEngine();
     if (!Q) return card("Hunting queries", h("p", { class: "empty", text: "Query engine (js/queries.js) is not loaded on this page." }));
+    if (!items.length) return card("Hunting queries", h("p", { class: "empty", text: "No hunt-able indicators (URLs, IPs, domains, paths or registry keys) in the decoded text." }));
     var st = { plat: "kql", days: 30 };
     var body = h("div", {});
     var sec = h("section", { class: "card" }, [
