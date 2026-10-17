@@ -21,7 +21,7 @@
 .nav a, .nav .soon { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 10px; padding: 7px; border-radius: 12px; border: 1px solid transparent; color: var(--body); }
 .nav a:hover { text-decoration: none; background: rgba(167, 139, 250, 0.09); }
 .nav a.on { color: var(--text); border-color: rgba(244, 114, 182, 0.5); background: linear-gradient(90deg, rgba(167, 139, 250, 0.24), rgba(244, 114, 182, 0.14)); }
-.nav img { width: 38px; height: 38px; border-radius: 10px; background: #0a0613; object-fit: contain; }
+.nav img { width: 38px; height: 38px; border-radius: 10px; background: var(--well); object-fit: contain; }
 .nl { min-width: 0; }
 .nl strong { display: block; font: 600 13.5px var(--sans); color: var(--text); white-space: nowrap; }
 .nl small { display: block; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -71,7 +71,7 @@
 .divider::before, .divider::after { content: ""; flex: 1; height: 2px; border-radius: 2px; }
 .divider::before { background: linear-gradient(90deg, transparent, var(--violet) 60%, var(--magenta)); }
 .divider::after { background: linear-gradient(90deg, var(--magenta), var(--amber) 40%, transparent); }
-.divider span { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px; border-radius: 999px; border: 1px solid var(--line-strong); background: #170d2b; color: var(--text); font: 600 12px var(--mono); letter-spacing: 0.22em; text-transform: uppercase; box-shadow: 0 0 24px rgba(244, 114, 182, 0.18); }
+.divider span { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--text); font: 600 12px var(--mono); letter-spacing: 0.22em; text-transform: uppercase; box-shadow: 0 0 24px rgba(244, 114, 182, 0.18); }
 .divider span::before, .divider span::after { content: "◆"; color: var(--magenta); font-size: 9px; letter-spacing: 0; }
 
 .ucards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 36px; }
@@ -144,7 +144,13 @@
 .safe h2 { margin: 0 0 14px; display: flex; align-items: center; gap: 10px; font: 700 18px var(--display); color: var(--text); }
 .safe h2::before { content: ""; width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--ok), var(--violet)); -webkit-mask: radial-gradient(circle at 50% 42%, transparent 4px, #000 4.5px); mask: radial-gradient(circle at 50% 42%, transparent 4px, #000 4.5px); }
 .safe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.safe-grid div { display: grid; align-content: start; gap: 4px; padding: 12px 14px; border-radius: 12px; background: rgba(10, 6, 19, 0.55); border: 1px solid var(--line); }
+.safe-grid div { display: grid; align-content: start; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--sunken); border: 1px solid var(--line); }
 .safe-grid strong { color: var(--text); font: 600 14px var(--sans); }
 .safe-grid span { font-size: 13px; line-height: 1.5; color: var(--body); }
 .safe-v { margin: 12px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* Light theme for the shell chrome (the shell carries its own theme via data-theme) */
+:root[data-theme="light"] .side { background: linear-gradient(180deg, #ffffff, #f3eefb); }
+:root[data-theme="light"] .toolbar { background: rgba(255, 255, 255, 0.9); }
+:root[data-theme="light"] .ucard:hover { box-shadow: 0 16px 36px rgba(76, 48, 120, 0.14); }
+:root[data-theme="light"] .hero-img { filter: drop-shadow(0 20px 36px rgba(76, 48, 120, 0.25)); }

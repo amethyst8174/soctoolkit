@@ -97,15 +97,21 @@
   // shell, another tool, or the external Header-Lens site.
   var toolTheme = $("tool-theme");
   function themeableTool(tool) { return tool && !/^\.\.\//.test(tool.url) && !/header-lens/.test(tool.url); }
+  function paintToggle(btn, state) {
+    btn.setAttribute("data-theme-state", state);
+    btn.setAttribute("aria-pressed", String(state === "dark"));
+    btn.setAttribute("aria-label", state === "light" ? "Switch tool to dark theme" : "Switch tool to light theme");
+    var lab = btn.querySelector(".tt-label"); if (lab) lab.textContent = state === "light" ? "Light" : "Dark";
+  }
   function syncThemeToggle() {
     if (!toolTheme) return;
     var id = location.hash.slice(1), tool = null;
     TOOLS.forEach(function (t) { if (t.id === id) tool = t; });
     if (!themeableTool(tool)) { toolTheme.hidden = true; return; }
     toolTheme.hidden = false;
-    var f = frameFor[id], th = "dark";
-    try { if (f && f.contentWindow && f.contentWindow.SOCTheme) th = f.contentWindow.SOCTheme.get(); } catch (e) { th = "dark"; }
-    toolTheme.classList.toggle("tl-light", th === "light");
+    var f = frameFor[id], th = "light";
+    try { if (f && f.contentWindow && f.contentWindow.SOCTheme) th = f.contentWindow.SOCTheme.get(); } catch (e) { th = "light"; }
+    paintToggle(toolTheme, th);
   }
   if (toolTheme) toolTheme.addEventListener("click", function () {
     var id = location.hash.slice(1), f = frameFor[id];
