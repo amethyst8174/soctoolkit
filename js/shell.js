@@ -92,6 +92,35 @@
   }
   function hideHint() { clearTimeout(hintTimer); hint.classList.remove("show"); }
 
+  // Per-tool light/dark: the toolbar toggle proxies to the active tool's own theme logic
+  // (window.SOCTheme inside the frame), so it changes only that tool's frame — never the
+  // shell, another tool, or the external Header-Lens site.
+  var toolTheme = $("tool-theme");
+  function themeableTool(tool) { return tool && !/^\.\.\//.test(tool.url) && !/header-lens/.test(tool.url); }
+  function syncThemeToggle() {
+    if (!toolTheme) return;
+    var id = location.hash.slice(1), tool = null;
+    TOOLS.forEach(function (t) { if (t.id === id) tool = t; });
+    if (!themeableTool(tool)) { toolTheme.hidden = true; return; }
+    toolTheme.hidden = false;
+    var f = frameFor[id], th = "dark";
+    try { if (f && f.contentWindow && f.contentWindow.SOCTheme) th = f.contentWindow.SOCTheme.get(); } catch (e) { th = "dark"; }
+    toolTheme.classList.toggle("tl-light", th === "light");
+  }
+  if (toolTheme) toolTheme.addEventListener("click", function () {
+    var id = location.hash.slice(1), f = frameFor[id];
+    try { if (f && f.contentWindow && f.contentWindow.SOCTheme) f.contentWindow.SOCTheme.toggle(); } catch (e) { }
+    syncThemeToggle();
+  });
+
+  // Clicking a utility link that is already open does not fire hashchange; re-open it fresh.
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var id = a.getAttribute("href").slice(1);
+    if (id && location.hash === "#" + id && TOOLS.some(function (t) { return t.id === id; })) route();
+  });
+
   // Routing: #<tool id> opens that tool, anything else shows the home page.
   function route() {
     var id = location.hash.slice(1), tool = null;
@@ -105,6 +134,7 @@
     if (!tool) {
       body.classList.add("is-home");
       toolview.classList.add("hidden"); home.classList.remove("hidden");
+      if (toolTheme) toolTheme.hidden = true;
       document.title = "SOC Toolkit · Cyber Insight Signals";
       setOpen(!phone.matches);
       $("main").scrollTo(0, 0);
@@ -115,15 +145,16 @@
     $("crumb-img").src = tool.icon;
     $("crumb-name").textContent = tool.name;
     document.title = tool.name + " · SOC Toolkit";
-    // Each tool keeps its own frame while the page is open, so switching back keeps your work.
-    // Nothing is saved: closing or reloading the page clears every frame.
-    if (!frameFor[tool.id]) {
-      frameFor[tool.id] = h("iframe", { class: "frame", src: tool.url, title: tool.name });
-      frames.appendChild(frameFor[tool.id]);
-    }
+    // Open the tool fresh every time, so each visit starts at the input page with no old
+    // results. Nothing is saved: the previous frame is discarded and a new one loaded.
+    if (frameFor[tool.id]) { frameFor[tool.id].remove(); }
+    frameFor[tool.id] = h("iframe", { class: "frame", src: tool.url, title: tool.name });
+    frames.appendChild(frameFor[tool.id]);
+    frameFor[tool.id].addEventListener("load", syncThemeToggle);
     for (var k in frameFor) frameFor[k].classList.toggle("hidden", k !== tool.id);
     setOpen(false);
     showHint();
+    syncThemeToggle();
   }
   window.addEventListener("hashchange", route);
   route();
