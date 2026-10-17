@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Privacy enforcement: the browser blocks every outbound request and form submission from this page. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Tracer-Lens · SOC Toolkit</title>
+  <meta name="description" content="Graphical PCAP / PCAPNG analyzer: flows, top talkers, protocol and timeline charts, a host graph, offline IP geo / ASN / threat / VPN enrichment, anomaly findings and hunt queries. Everything runs in your browser; nothing is uploaded or stored.">
+  <link rel="icon" type="image/png" href="assets/img/tracerlens.png">
+  <link rel="stylesheet" href="css/style.css?v=20261017e">
+  <script src="js/embed.js?v=20261017e"></script>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="SOC Toolkit home">
+      <img src="assets/img/tracerlens.png" alt="" width="28" height="28">
+      <span>soc<em>-toolkit</em></span>
+    </a>
+    <div class="topbar-r">
+      <nav class="share" aria-label="Share soc-toolkit">
+        <span class="share-l">Share</span>
+        <a class="share-btn share-li" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23tracer-lens" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn" aria-label="Share on LinkedIn"><span aria-hidden="true">in</span></a>
+        <a class="share-btn share-x" href="https://x.com/intent/post?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23tracer-lens&amp;text=Graphical%20PCAP%20analyzer%20that%20runs%20entirely%20in%20your%20browser" target="_blank" rel="noopener noreferrer" title="Share on X (Twitter)" aria-label="Share on X (Twitter)"><span aria-hidden="true">X</span></a>
+        <a class="share-btn share-fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23tracer-lens" target="_blank" rel="noopener noreferrer" title="Share on Facebook" aria-label="Share on Facebook"><span aria-hidden="true">f</span></a>
+      </nav>
+      <a class="brand" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+        <img src="assets/img/cis-logo.png" alt="Cyber Insight Signals logo" width="36" height="36">
+        <span class="brand-text">
+          <strong>Cyber Insight Signals</strong>
+          <small>Translating Cyber Chaos into Clarity</small>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main id="view-input">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Tracer-Lens</p>
+        <h1>Tracer<span>-Lens</span></h1>
+        <p class="lede">Drop in a packet capture and read it as a dashboard instead of a packet list. Tracer-Lens charts protocols and traffic over time, maps flows and top talkers, enriches every external IP with offline geo, ASN, threat and VPN data, flags anomalies like beaconing and scans, and hands you hunt queries. Everything runs in your browser, and nothing is uploaded, looked up online or stored.</p>
+        <ul class="trust" aria-label="Privacy guarantees">
+          <li><span class="tdot tdot-v" aria-hidden="true"></span>Parsed offline in your browser</li>
+          <li><span class="tdot tdot-m" aria-hidden="true"></span>The capture is never sent anywhere</li>
+          <li><span class="tdot tdot-a" aria-hidden="true"></span>Nothing is stored</li>
+        </ul>
+      </div>
+      <div class="hero-art">
+        <img src="assets/img/tracerlens.png" alt="A 3D radar lens inspecting network packets" width="200" height="200">
+      </div>
+    </section>
+
+    <section class="card input-card" aria-labelledby="input-title">
+      <h2 id="input-title" class="sr-head">Open a capture</h2>
+      <div class="drop drop-big" id="drop-zone">
+        <input id="file-input" type="file" accept=".pcap,.pcapng,.cap,application/vnd.tcpdump.pcap,application/octet-stream" hidden>
+        <svg class="drop-icon" width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="url(#tg)" stroke-width="1.8"/><line x1="15.5" y1="15.5" x2="21" y2="21" stroke="url(#tg)" stroke-width="2" stroke-linecap="round"/><path d="M7 11h2l1.2-3 1.6 5 1.2-2h1.5" stroke="#f472b6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><defs><linearGradient id="tg" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs></svg>
+        <p class="drop-title">Drop a <strong>.pcap</strong> or <strong>.pcapng</strong> here</p>
+        <div class="drop-actions">
+          <label class="btn btn-primary" for="file-input">Open capture</label>
+          <button class="btn btn-ghost" id="sample-btn" type="button">Try a sample</button>
+        </div>
+        <p class="drop-hint">Ethernet / IPv4 / IPv6 captures from Wireshark, tcpdump or similar. Large files are read in chunks; nothing is uploaded.</p>
+      </div>
+      <div class="progress" id="progress-wrap" hidden>
+        <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="progress-row"><span id="progress-label" class="status">Reading…</span><button class="btn btn-ghost btn-sm" id="cancel-btn" type="button">Cancel</button></div>
+      </div>
+      <p id="input-status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="why" aria-label="How Tracer-Lens works">
+      <div class="why-item"><h3>Flows, not packets</h3><p>Conversations, top talkers, protocol mix and a traffic timeline, with a host graph so the shape of the capture is visible at a glance.</p></div>
+      <div class="why-item"><h3>Offline enrichment</h3><p>Every external IP is matched against bundled geo, ASN, Tor, threat-list and VPN data. No reputation or geolocation service ever sees what you looked at.</p></div>
+      <div class="why-item"><h3>Findings &amp; hunts</h3><p>Beaconing, scans, cleartext credentials, DGA-style DNS, SMBv1 and threat hits are flagged, and the IOCs become queries for Sentinel, Splunk, Elastic and CrowdStrike.</p></div>
+    </section>
+
+    <details class="proof">
+      <summary>Why it's safe to open confidential captures here</summary>
+      <ul>
+        <li><strong>Processed on your device.</strong> The file is read and parsed as code in your browser tab, in chunks, so even multi-gigabyte captures never leave your machine.</li>
+        <li><strong>The browser blocks outbound traffic.</strong> A Content Security Policy forbids this page from sending requests or submitting forms, so data cannot leave even by mistake.</li>
+        <li><strong>Enrichment is local.</strong> Geo, ASN, threat and VPN checks use lists shipped with the site, not online services.</li>
+        <li><strong>Nothing persists.</strong> No accounts, cookies or browser storage. Leaving or reloading the page wipes everything.</li>
+        <li><strong>Verify it yourself.</strong> Open DevTools: the Network tab stays empty while you work. The full source is <a href="https://github.com/amethyst8174/soctoolkit" rel="noopener noreferrer" target="_blank">on GitHub</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <main id="view-res" class="res hidden" tabindex="-1" aria-label="Capture analysis"></main>
+
+  <footer class="footer">
+    <section class="more" aria-labelledby="more-title">
+      <h2 id="more-title">Check out our other utilities</h2>
+      <div class="more-links">
+        <a class="more-link" href="ioc.html" data-shell="ioc" data-shell-base="./">
+          <strong>IOC Extractor <span aria-hidden="true">↗</span></strong>
+          <span>Pull IOCs from a report and get ready-made hunt queries.</span>
+        </a>
+        <a class="more-link" href="decoder.html" data-shell="decoder" data-shell-base="./">
+          <strong>DecodeSphere <span aria-hidden="true">↗</span></strong>
+          <span>Deobfuscate PowerShell and command lines layer by layer.</span>
+        </a>
+      </div>
+    </section>
+    <a class="brand brand-sm" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+      <img src="assets/img/cis-logo.png" alt="" width="28" height="28">
+      <span>Cyber Insight Signals</span>
+    </a>
+    <nav class="links" aria-label="Cyber Insight Signals links">
+      <a href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">YouTube</a>
+      <a href="#" data-link="blog" rel="noopener noreferrer" target="_blank">Security blog</a>
+    </nav>
+    <p class="copy">© <span id="year">2026</span> @CyberInsightSignal. All rights reserved.</p>
+  </footer>
+
+  <script src="js/config.js?v=20261017e"></script>
+  <script src="data/tlds.js?v=20261017e"></script>
+  <script src="data/world.js?v=20261017e"></script>
+  <script src="data/geo.js?v=20261017e"></script>
+  <script src="data/threat.js?v=20261017e"></script>
+  <script src="data/vpn.js?v=20261017e"></script>
+  <script src="js/extract.js?v=20261017e"></script>
+  <script src="js/ipdb.js?v=20261017e"></script>
+  <script src="js/vpncheck.js?v=20261017e"></script>
+  <script src="js/queries.js?v=20261017e"></script>
+  <script src="js/pcap-parse.js?v=20261017e"></script>
+  <script src="js/tracerlens.js?v=20261017e"></script>
+</body>
+</html>

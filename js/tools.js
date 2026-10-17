@@ -34,6 +34,12 @@ window.SOC_TOOLS = [
     share: "DecodeSphere: PowerShell and command-line decoder that runs entirely in your browser"
   },
   {
+    id: "tracer-lens", name: "Tracer-Lens", tag: "PCAP / PCAPNG analyzer",
+    desc: "Open a packet capture and read it as a dashboard: flows, top talkers, protocol and timeline charts, a host graph, offline IP geo / ASN / threat / VPN enrichment, anomaly findings and hunt queries.",
+    icon: "assets/img/tracerlens.png", url: "tracerlens.html", color: "var(--warn)",
+    share: "Tracer-Lens: a graphical PCAP analyzer that runs entirely in your browser"
+  },
+  {
     id: "vpn-check", name: "VPN IP Checker", tag: "VPN, Tor and Private Relay",
     desc: "Check whether IP addresses belong to a VPN, Tor or iCloud Private Relay using published lists, with a source and confidence level for every answer.",
     icon: "assets/img/vpn.png", url: "vpn.html", color: "var(--ok)",
