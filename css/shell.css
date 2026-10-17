@@ -46,7 +46,8 @@
 /* Main column */
 .main { position: relative; min-width: 0; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column; }
 .home { display: flex; flex-direction: column; min-height: 100%; }
-.home .topbar { max-width: 1160px; }
+/* Full-bleed dark top bar on the home page, with its controls aligned to the hero column. */
+.home .topbar { max-width: none; padding-left: max(24px, calc((100% - 1160px) / 2 + 24px)); padding-right: max(24px, calc((100% - 1160px) / 2 + 24px)); }
 .spacer { flex: 1; }
 .tools-m { display: none; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--magenta); background: linear-gradient(135deg, rgba(167, 139, 250, 0.35), rgba(244, 114, 182, 0.35)); color: var(--text); font: 600 13px var(--sans); cursor: pointer; animation: pulse 2.2s ease-out infinite; }
 .home-in { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 24px; flex: 1; display: flex; flex-direction: column; }
@@ -149,8 +150,7 @@
 .safe-grid span { font-size: 13px; line-height: 1.5; color: var(--body); }
 .safe-v { margin: 12px 0 0; font-size: 12.5px; color: var(--muted); }
 
-/* Light theme for the shell chrome (the shell carries its own theme via data-theme) */
-:root[data-theme="light"] .side { background: linear-gradient(180deg, #ffffff, #f3eefb); }
-:root[data-theme="light"] .toolbar { background: rgba(255, 255, 255, 0.9); }
+/* Light-theme polish for the main content area only. The side panel and top bars keep the
+   dark palette in both themes (see .side/.topbar/.toolbar in style.css). */
 :root[data-theme="light"] .ucard:hover { box-shadow: 0 16px 36px rgba(76, 48, 120, 0.14); }
 :root[data-theme="light"] .hero-img { filter: drop-shadow(0 20px 36px rgba(76, 48, 120, 0.25)); }
