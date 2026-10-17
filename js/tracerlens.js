@@ -295,7 +295,7 @@
       days.addEventListener("change", function () { st.days = +days.value; draw(); });
       body.appendChild(plats);
       body.appendChild(h("div", { class: "qopts" }, [(st.plat === "elastic" || st.plat === "cql") ? h("span", { class: "sel-info", text: "Set the range in the platform's time picker" }) : days, q.trim() ? h("div", { class: "actions" }, [copyBtn, dlBtn]) : null]));
-      body.appendChild(q.trim() ? h("pre", { class: "code" }, [h("code", { text: q })]) : h("p", { class: "empty", text: "No queryable indicators." }));
+      body.appendChild(q.trim() ? h("pre", { class: "code code-fixed" }, [h("code", { text: q })]) : h("p", { class: "code-fixed empty", text: "No queryable indicators." }));
     }
     draw(); return sec;
   }
@@ -366,6 +366,16 @@
     });
     left.appendChild(card("Top talkers", talkBody, a.hosts.length + " hosts · enriched offline"));
 
+    // destinations by country (offline geo) — directly under Top talkers
+    var byCc = {}; a.hosts.forEach(function (hst) { var e = S.enrich[hst.ip] || enrichIp(hst.ip); if (e.internal || !e.cc) return; byCc[e.cc] = (byCc[e.cc] || 0) + hst.bytes; });
+    var ccs = Object.keys(byCc).map(function (k) { return { cc: k, bytes: byCc[k] }; }).sort(function (x, y) { return y.bytes - x.bytes; }).slice(0, 10);
+    if (ccs.length) {
+      var geoBody = h("div", { class: "two", style: "gap:8px 20px" });
+      var maxCc = ccs[0].bytes || 1;
+      ccs.forEach(function (c) { geoBody.appendChild(h("div", { class: "maprow", style: "margin-top:0" }, [h("span", { class: "cc", text: c.cc }), h("span", { class: "track", style: "height:9px;border-radius:6px;background:rgba(255,255,255,0.05);overflow:hidden" }, [h("span", { style: "display:block;height:100%;width:" + Math.round(c.bytes / maxCc * 100) + "%;background:var(--violet);border-radius:6px" })]), h("span", { class: "num", text: fmtBytes(c.bytes) })])); });
+      left.appendChild(card("Destinations by country", geoBody, "offline geo"));
+    }
+
     // conversations
     var flowBody = h("div", { style: "display:grid;gap:7px" });
     flowBody.appendChild(h("div", { class: "rowhead flow", style: "display:grid;gap:10px;margin-bottom:2px" }, [h("span", { text: "Source → Destination" }), h("span", { text: "Service" }), h("span", { text: "Bytes" }), h("span", { text: "Duration" })]));
@@ -423,21 +433,11 @@
     else fBody.appendChild(h("p", { class: "empty", text: "No anomalies flagged in this capture." }));
     right.appendChild(card("Findings", fBody, String(findings.length)));
 
-    // geo by country
-    var byCc = {}; a.hosts.forEach(function (hst) { var e = S.enrich[hst.ip] || enrichIp(hst.ip); if (e.internal || !e.cc) return; byCc[e.cc] = (byCc[e.cc] || 0) + hst.bytes; });
-    var ccs = Object.keys(byCc).map(function (k) { return { cc: k, bytes: byCc[k] }; }).sort(function (x, y) { return y.bytes - x.bytes; }).slice(0, 8);
-    if (ccs.length) {
-      var geoBody = h("div", {});
-      var maxCc = ccs[0].bytes || 1;
-      ccs.forEach(function (c) { geoBody.appendChild(h("div", { class: "maprow" }, [h("span", { class: "cc", text: c.cc }), h("span", { class: "track", style: "height:9px;border-radius:6px;background:rgba(255,255,255,0.05);overflow:hidden" }, [h("span", { style: "display:block;height:100%;width:" + Math.round(c.bytes / maxCc * 100) + "%;background:var(--violet);border-radius:6px" })]), h("span", { class: "num", text: fmtBytes(c.bytes) })])); });
-      right.appendChild(card("Destinations by country", geoBody, "offline geo"));
-    }
-
-    // queries
-    right.appendChild(renderQueries(iocs));
-
     grid.appendChild(right);
     view.appendChild(grid);
+
+    // Hunting queries: full width at the bottom of the page.
+    view.appendChild(renderQueries(iocs));
 
     view.appendChild(h("p", { class: "note", style: "text-align:center;margin-top:20px", text: "Parsed locally in your browser" + (a.meta.malformed ? " · " + a.meta.malformed + " unparsed packets" : "") + (a.flowOverflow ? " · " + fmtNum(a.flowOverflow) + " flows beyond display cap" : "") + ". Nothing was uploaded." }));
 
