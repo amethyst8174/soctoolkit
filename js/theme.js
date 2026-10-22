@@ -1,5 +1,5 @@
 /* Per-document light / dark theme for the SOC Toolkit.
- * In-memory only: no cookies, no localStorage, nothing stored — a reload returns to the
+ * In-memory only: no cookies, no browser storage, nothing stored — a reload returns to the
  * default (light), which keeps the toolkit's "nothing is stored" guarantee intact.
  * Applying a theme sets data-theme on THIS document's root, so a utility running inside the
  * shell themes only its own frame, never the shell, another tool, or the external Header-Lens.

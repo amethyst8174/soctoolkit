@@ -41,7 +41,6 @@
     if (attrs) for (var k in attrs) {
       if (k === "class") el.className = attrs[k];
       else if (k === "text") el.textContent = attrs[k];
-      else if (k === "html") el.innerHTML = attrs[k];
       else if (k === "color") el.style.setProperty("--c", attrs[k]);
       else if (k === "style") el.style.cssText = attrs[k]; // CSSOM: allowed under style-src 'self'
       else if (k === "on") for (var ev in attrs[k]) el.addEventListener(ev, attrs[k][ev]);
@@ -284,7 +283,7 @@
     var st = { plat: "kql", days: 30 }, body = h("div", {});
     var sec = h("section", { class: "card" }, [h("div", { class: "card-head" }, [h("h2", { text: "Hunting queries" }), h("span", { class: "sel-info", text: items.length + " indicators" })]), body]);
     function draw() {
-      body.innerHTML = "";
+      body.replaceChildren();
       var plats = h("div", { class: "plats", role: "group" }, PLATS.map(function (p) {
         return h("button", { class: "plat", type: "button", "aria-pressed": String(st.plat === p[0]), text: p[1], on: { click: function () { st.plat = p[0]; draw(); } } });
       }));
@@ -308,7 +307,7 @@
 
   /* ---------- main render ---------- */
   function render(a) {
-    var view = document.getElementById("view-res"); view.innerHTML = "";
+    var view = document.getElementById("view-res"); view.replaceChildren();
     var findings = buildFindings(a);
     var iocs = buildIocs(a);
     var topSev = findings.length ? findings[0].sev : null;

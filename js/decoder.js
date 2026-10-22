@@ -497,7 +497,6 @@
     if (attrs) for (var k in attrs) {
       if (k === "class") el.className = attrs[k];
       else if (k === "text") el.textContent = attrs[k];
-      else if (k === "html") el.innerHTML = attrs[k];
       else if (k === "color") el.style.setProperty("--c", attrs[k]); // CSSOM: allowed under style-src 'self'
       else if (k === "on") for (var ev in attrs[k]) el.addEventListener(ev, attrs[k][ev]);
       else if (attrs[k] != null) el.setAttribute(k, attrs[k]);
@@ -533,7 +532,7 @@
 
   function render(res, raw) {
     var view = document.getElementById("view-res");
-    view.innerHTML = "";
+    view.replaceChildren();
 
     var iocs = extractIOCs(res.output + "\n" + raw);
     var iocCount = iocs.urls.length + iocs.ips.length + iocs.domains.length + iocs.unc.length + iocs.paths.length + iocs.registry.length;
@@ -710,7 +709,7 @@
       body
     ]);
     function draw() {
-      body.innerHTML = "";
+      body.replaceChildren();
       var plats = h("div", { class: "plats", role: "group", "aria-label": "SIEM platform" }, PLATS.map(function (p) {
         return h("button", { class: "plat", type: "button", "aria-pressed": String(st.plat === p[0]), title: p[2], text: p[1], on: { click: function () { st.plat = p[0]; draw(); } } });
       }));
