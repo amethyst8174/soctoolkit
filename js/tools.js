@@ -44,5 +44,11 @@ window.SOC_TOOLS = [
     desc: "Check whether IP addresses belong to a VPN, Tor or iCloud Private Relay using published lists, with a source and confidence level for every answer.",
     icon: "assets/img/vpn.png", url: "vpn.html", color: "var(--ok)",
     share: "VPN IP checker that runs entirely in your browser"
+  },
+  {
+    id: "timeline", name: "Timeline Merger", tag: "Normalize & merge logs",
+    desc: "Parse syslog, CEF, LEEF and JSON logs, normalize timezones and merge several sources into one sorted timeline you can read across tools in order.",
+    icon: "assets/img/timeline.png", url: "timeline.html", color: "var(--t-attack)",
+    share: "Normalize and merge syslog, CEF, LEEF and JSON logs into one sorted timeline, entirely in your browser"
   }
 ];

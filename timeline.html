@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Privacy enforcement: the browser blocks every outbound request and form submission from this page. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Timeline Merger · SOC Toolkit</title>
+  <meta name="description" content="Normalize syslog, CEF, LEEF and JSON logs, convert every timestamp to one timezone, and merge several sources into a single sorted timeline. Runs entirely in your browser; nothing is uploaded or stored.">
+  <link rel="icon" type="image/png" href="assets/img/timeline.png">
+  <link rel="stylesheet" href="css/style.css?v=20261022a">
+  <script src="js/embed.js?v=20261022a"></script>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="SOC Toolkit home">
+      <img src="assets/img/timeline.png" alt="" width="28" height="28">
+      <span>soc<em>-toolkit</em></span>
+    </a>
+    <div class="topbar-r">
+      <button class="theme-toggle" type="button" data-theme-toggle data-theme-state="light" aria-label="Switch to light theme" title="Light / dark theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.1" fill="currentColor"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.7v2.2M12 19.1v2.2M2.7 12h2.2M19.1 12h2.2M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/></g></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8 8 0 1 1 9.4 4 6.3 6.3 0 0 0 20 14.6Z" fill="currentColor"/></svg>
+        <span class="tt-label">Light</span>
+      </button>
+      <nav class="share" aria-label="Share soc-toolkit">
+        <span class="share-l">Share</span>
+        <a class="share-btn share-li" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23timeline" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn" aria-label="Share on LinkedIn"><span aria-hidden="true">in</span></a>
+        <a class="share-btn share-x" href="https://x.com/intent/post?url=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23timeline&amp;text=Normalize%20and%20merge%20syslog%2C%20CEF%2C%20LEEF%20and%20JSON%20logs%20into%20one%20sorted%20timeline%2C%20entirely%20in%20your%20browser" target="_blank" rel="noopener noreferrer" title="Share on X (Twitter)" aria-label="Share on X (Twitter)"><span aria-hidden="true">X</span></a>
+        <a class="share-btn share-fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Famethyst8174.github.io%2Fsoctoolkit%2F%23timeline" target="_blank" rel="noopener noreferrer" title="Share on Facebook" aria-label="Share on Facebook"><span aria-hidden="true">f</span></a>
+      </nav>
+      <a class="brand" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+        <img src="assets/img/cis-logo.png" alt="Cyber Insight Signals logo" width="36" height="36">
+        <span class="brand-text">
+          <strong>Cyber Insight Signals</strong>
+          <small>Translating Cyber Chaos into Clarity</small>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main id="view-input">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Timeline Merger</p>
+        <h1>Timeline <span>Merger</span></h1>
+        <p class="lede">Paste or load logs from several systems, and get one clean, time-sorted timeline. It normalizes syslog, CEF, LEEF and JSON, converts every timestamp to the timezone you choose, and merges your sources together so you can read an incident across tools in order. Everything runs in your browser, and nothing is uploaded, looked up online or stored.</p>
+        <ul class="trust" aria-label="Privacy guarantees">
+          <li><span class="tdot tdot-v" aria-hidden="true"></span>Parsing runs offline in your browser</li>
+          <li><span class="tdot tdot-m" aria-hidden="true"></span>Logs are never sent anywhere</li>
+          <li><span class="tdot tdot-a" aria-hidden="true"></span>Nothing is stored</li>
+        </ul>
+      </div>
+      <div class="hero-art">
+        <img src="assets/img/timeline.png" alt="Several glowing log streams merging into one sorted timeline" width="200" height="200">
+      </div>
+    </section>
+
+    <section class="card input-card" aria-labelledby="input-title">
+      <div class="card-head">
+        <h2 id="input-title">Add log sources</h2>
+        <div class="tools">
+          <label class="btn btn-ghost" for="file-input">Open files</label>
+          <input id="file-input" type="file" accept=".log,.txt,.json,.ndjson,.csv,.cef,.leef,.syslog,.out,text/*,application/json" multiple hidden>
+          <button class="btn btn-ghost" id="sample-btn" type="button">Try a sample</button>
+          <button class="btn btn-ghost" id="clear-btn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="drop" id="drop-zone">
+        <textarea id="text-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-describedby="input-status"
+          placeholder="Paste log lines from one system here, then Add as source and paste the next.&#10;&#10;Mixed formats are fine: syslog (RFC 3164 / 5424), CEF, LEEF and JSON / JSON-lines are detected per line.&#10;You can also drop several .log / .json / .cef files here — each becomes a source."></textarea>
+      </div>
+
+      <div class="opts tl-opts">
+        <span class="tl-opt">
+          <label for="fmt-sel">Format</label>
+          <select class="field" id="fmt-sel" aria-label="Log format">
+            <option value="auto">Auto-detect per line</option>
+            <option value="syslog">Syslog (RFC 3164 / 5424)</option>
+            <option value="cef">CEF</option>
+            <option value="leef">LEEF</option>
+            <option value="json">JSON / JSON-lines</option>
+          </select>
+        </span>
+        <span class="tl-opt">
+          <label for="assume-sel">Assume TZ</label>
+          <select class="field" id="assume-sel" aria-label="Timezone to assume for logs with no offset" title="Applied to timestamps that carry no timezone, e.g. BSD syslog"></select>
+        </span>
+        <span class="tl-opt">
+          <label for="display-sel">Show times in</label>
+          <select class="field" id="display-sel" aria-label="Timezone to display the merged timeline in"></select>
+        </span>
+        <button class="btn btn-ghost" id="add-btn" type="button">Add as source</button>
+      </div>
+
+      <div class="src-chips" id="src-chips" aria-live="polite" aria-label="Staged log sources"></div>
+
+      <div class="card-foot">
+        <p id="input-status" class="status" aria-live="polite">Waiting for logs</p>
+        <button class="btn btn-primary" id="analyze-btn" type="button">Build timeline</button>
+      </div>
+    </section>
+
+    <section class="why" aria-label="How Timeline Merger works">
+      <div class="why-item"><h3>Four formats, one shape</h3><p>Syslog (RFC 3164 and 5424), CEF, LEEF and JSON lines are parsed into the same normalized event: time, source, host, severity and message, with the rest kept as fields.</p></div>
+      <div class="why-item"><h3>Timezones reconciled</h3><p>Timestamps with an offset are read as-is; naive ones (like BSD syslog) take the timezone you pick. Everything is sorted on absolute UTC, then shown in the zone you choose.</p></div>
+      <div class="why-item"><h3>One ordered story</h3><p>Several exports merge into a single sorted timeline, so you can follow an incident across firewall, EDR and app logs in the real order it happened.</p></div>
+    </section>
+
+    <details class="proof">
+      <summary>Why it's safe to merge confidential logs here</summary>
+      <ul>
+        <li><strong>Processed on your device.</strong> Parsing, timezone conversion and sorting all run as JavaScript in this tab. The logs you load are never uploaded to any service.</li>
+        <li><strong>The browser blocks outbound traffic.</strong> A Content Security Policy forbids this page from sending requests or submitting forms, so data cannot leave even by mistake.</li>
+        <li><strong>Nothing persists.</strong> No accounts, cookies or browser storage. Leaving or reloading the page wipes every source and the merged timeline.</li>
+        <li><strong>Exports stay local.</strong> CSV and JSON of the timeline are built in your browser and saved straight to your device, never sent anywhere.</li>
+        <li><strong>Verify it yourself.</strong> Open DevTools: the Network tab stays empty while you work. The full source is <a href="https://github.com/amethyst8174/soctoolkit" rel="noopener noreferrer" target="_blank">on GitHub</a>.</li>
+      </ul>
+    </details>
+  </main>
+
+  <main id="view-res" class="res hidden" tabindex="-1" aria-label="Merged timeline"></main>
+
+  <footer class="footer">
+    <section class="more" aria-labelledby="more-title">
+      <h2 id="more-title">Check out our other utilities</h2>
+      <div class="more-links">
+        <a class="more-link" href="ioc.html" data-shell="ioc" data-shell-base="./">
+          <strong>IOC Extractor <span aria-hidden="true">↗</span></strong>
+          <span>Pull IOCs from a report and get ready-made hunt queries.</span>
+        </a>
+        <a class="more-link" href="decoder.html" data-shell="decoder" data-shell-base="./">
+          <strong>DecodeSphere <span aria-hidden="true">↗</span></strong>
+          <span>Deobfuscate PowerShell and command lines, layer by layer.</span>
+        </a>
+      </div>
+    </section>
+    <a class="brand brand-sm" href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">
+      <img src="assets/img/cis-logo.png" alt="" width="28" height="28">
+      <span>Cyber Insight Signals</span>
+    </a>
+    <nav class="links" aria-label="Cyber Insight Signals links">
+      <a href="#" data-link="youtube" rel="noopener noreferrer" target="_blank">YouTube</a>
+      <a href="#" data-link="blog" rel="noopener noreferrer" target="_blank">Security blog</a>
+    </nav>
+    <p class="copy">© <span id="year">2026</span> @CyberInsightSignal. All rights reserved.</p>
+  </footer>
+
+  <script src="js/config.js?v=20261022a"></script>
+  <script src="js/logparse.js?v=20261022a"></script>
+  <script src="js/timeline.js?v=20261022a"></script>
+  <script src="js/theme.js?v=20261017i"></script>
+</body>
+</html>
